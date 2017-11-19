@@ -4,9 +4,15 @@ const client = new Discord.Client();
 const config = require('./config.json');
 const dataDir = './data';
 const commands = {};
+const events = {};
+const plugins = {};
 
 if (!fs.existsSync(dataDir)) {
   fs.mkdirSync(dataDir);
+}
+
+module.exports.getClient = function() {
+  return client;
 }
 
 /*
@@ -14,28 +20,93 @@ Iterates through the events and commands (both of which are objects) of each plu
 Each event is hooked onto their respective event name, and each command is put into a map,
 which is accessed later on in a message event for executing commands.
 */
-function setupPlugin(plugin) {
-  plugin.setup(client);
-  let events = plugin.events;
+function setupPlugin(plugin, pluginName) {
+  if (plugin.setup) {
+    plugin.setup();
+  }
+  let pluginEvents = plugin.events;
   let pluginCommands = plugin.commands;
-  for (const eventName in events) {
-    client.on(eventName, events[eventName]);
+  for (const eventName in pluginEvents) {
+    events[`${pluginName}:${eventName}`] = {
+      fun: pluginEvents[eventName],
+      eventType: eventName,
+      pluginName: pluginName
+    };
+    client.on(eventName, events[`${pluginName}:${eventName}`].fun);
   }
   for (const commandName in pluginCommands) {
-    commands[commandName] = pluginCommands[commandName];
+    commands[commandName] = {
+      run: pluginCommands[commandName],
+      pluginName: pluginName
+    };
+  }
+  plugins[pluginName] = plugin;
+}
+
+function shutdownPlugin(pluginName) {
+  for (const eventName in events) {
+    if (events[eventName].pluginName === pluginName) {
+      client.removeListener(events[eventName].eventType, events[eventName].fun);
+      delete events[eventName];
+    }
+  }
+  for (const commandName in commands) {
+    if (commands[commandName].pluginName === pluginName) {
+      delete commands[commandName];
+    }
+  }
+  delete plugins[pluginName];
+}
+
+// Simply removes the events and commands of the specified plugin, then sets it back up again.
+commands.load = {
+  run: function(msg, args) {
+    let filename = `${args[0]}.js`;
+    let file = `./plugins/${filename}`;
+    if (!fs.existsSync(file)) {
+      if (plugins[filename]) {
+        msg.channel.send(`Unloading plugin '${filename}' because it was deleted...`);
+        shutdownPlugin(filename);
+      } else {
+        msg.channel.send(`Plugin '${filename}' doesn't exist.`);
+      }
+      return;
+    }
+    shutdownPlugin(filename);
+    delete require.cache[require.resolve(file)];
+    let plugin = require(file);
+    msg.channel.send(`Loading plugin '${filename}'...`);
+    setupPlugin(plugin, filename);
+    msg.channel.send('Successfully loaded.');
+  }
+};
+
+commands.unload = {
+  run: function(msg, args) {
+    let filename = `${args[0]}.js`;
+    let file = `./plugins/${filename}`;
+    if (!fs.existsSync(file)) {
+      msg.channel.send(`Plugin '${filename}' doesn't exist.`);
+      return;
+    }
+    msg.channel.send(`Unloading plugin '${filename}'...`);
+    shutdownPlugin(filename);
+    msg.channel.send('Successfully unloaded.');
   }
 }
 
-// Simply iterates through each plugin file and sets it up.
-fs.readdir('./plugins', function(err, files) {
-  files.forEach(file => {
-    let plugin = require(`./plugins/${file}`);
-    setupPlugin(plugin);
-  });
-});
-
 client.on('ready', () => {
   console.log(`Logged into ${client.guilds.size} guilds.`);
+  // Simply iterates through each plugin file and sets it up.
+  fs.readdir('./plugins', function(err, files) {
+    files
+      .filter(file => file.substr(-3) === '.js')
+      .forEach(file => {
+        let plugin = require(`./plugins/${file}`);
+        setupPlugin(plugin, file);
+        console.log(`Loaded ${file}.`);
+      });
+  });
 });
 
 /*
@@ -53,7 +124,7 @@ client.on('message', (msg) => {
   try {
     let command = commands[commandName];
     if (command) {
-      command(client, msg, args);
+      command.run(msg, args);
     }
   } catch (e) {
     console.error(e);
@@ -61,6 +132,8 @@ client.on('message', (msg) => {
 });
 
 if (config.token) {
+  client.ownerId = config.ownerId;
+  client.prefix = config.prefix;
   client.login(config.token);
 } else {
   console.error('Add a valid token to the "config.json"');
