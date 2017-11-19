@@ -72,6 +72,9 @@ commands.load = {
       }
       return;
     }
+    if (plugins[filename]) {
+      plugins[filename].unload();
+    }
     shutdownPlugin(filename);
     delete require.cache[require.resolve(file)];
     let plugin = require(file);
@@ -88,6 +91,9 @@ commands.unload = {
     if (!fs.existsSync(file)) {
       msg.channel.send(`Plugin '${filename}' doesn't exist.`);
       return;
+    }
+    if (plugins[filename]) {
+      plugins[filename].unload();
     }
     msg.channel.send(`Unloading plugin '${filename}'...`);
     shutdownPlugin(filename);

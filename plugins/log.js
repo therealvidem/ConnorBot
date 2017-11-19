@@ -77,3 +77,6 @@ module.exports.setup = function() {
     console.log('Loaded loggingChannels data.');
   });
 }
+module.exports.unload = function() {
+  provider.close();
+}

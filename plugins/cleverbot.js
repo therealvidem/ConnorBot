@@ -56,7 +56,7 @@ function reply(msg, channel, userId) {
 
 events.message = function(msg) {
   // Checks if the user isn't a bot and if the user has mentioned the bot.
-  if (msg.author.bot || !msg.isMemberMentioned(client.user)) return;
+  if (msg.author.bot || !msg.isMemberMentioned(client.user) || msg.mentions.everyone) return;
   // Since the message could look like "@Bot hello there", we have to
   // split the content into an array of strings, delete the mention part,
   // then join the strings together again, and finally pass in the result: "hello there".
@@ -87,4 +87,7 @@ module.exports.setup = function() {
   client.cleverBot.defer.then(() => {
     console.log('Loaded Cleverbot data.');
   });
+}
+module.exports.unload = function() {
+  provider.close();
 }
