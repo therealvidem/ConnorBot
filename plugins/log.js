@@ -5,7 +5,7 @@ const fs = require('fs');
 const events = {};
 const commands = {};
 const dir = './data/channellogger';
-var client;
+const client = require('../main.js').getClient();
 
 function makeDir(guildDir, channelFile) {
   if (!fs.existsSync(dir)) {
@@ -17,13 +17,14 @@ function makeDir(guildDir, channelFile) {
 }
 
 function log(msg) {
+  if (!msg.guild) return;
   const guildId = msg.guild.id;
   const channel = msg.channel;
   const channelId = channel.id;
   if (!client.loggingChannels.get(channelId)) return;
   const author = msg.author;
   const attachments = msg.attachments;
-  const content = msg.cleanContent;
+  const content = String.raw`${msg.cleanContent}`;
   const timestamp = msg.createdTimestamp;
   const guildDir = `${dir}/${guildId}`;
   const channelFile = `${guildDir}/${channelId}.log`;
@@ -33,10 +34,12 @@ function log(msg) {
   log += `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}.${date.getMilliseconds()} `;
   log += `#${channel.name} `;
   log += `${author.username}#${author.discriminator}:\n`;
-  log += attachments.size
-         ? `ATTACHMENT: ${attachments.first().url}`
-         : String.raw`${content}`;
-  log += '\n\n';
+  if (content.length) {
+    log += `${content}\n\n`;
+  }
+  if (attachments.size) {
+    log += `ATTACHMENT: ${attachments.first().url}\n\n`;
+  }
   fs.appendFile(channelFile, log, function (err) {
     if (err) {
       console.log(err);
@@ -53,7 +56,7 @@ events.messageUpdate = function(oldmsg, newmsg) {
   log(newmsg);
 }
 
-commands.channellogger = function(client, msg, args) {
+commands.channellogger = function(msg, args) {
   const channel = msg.channel;
   let logging = client.loggingChannels.get(channel.id);
   if (logging === undefined) {
@@ -68,8 +71,7 @@ commands.channellogger = function(client, msg, args) {
 
 module.exports.events = events;
 module.exports.commands = commands;
-module.exports.setup = function(passedClient) {
-  client = passedClient;
+module.exports.setup = function() {
   client.loggingChannels = new Enmap({provider: provider});
   client.loggingChannels.defer.then(() => {
     console.log('Loaded loggingChannels data.');

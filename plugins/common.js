@@ -1,12 +1,16 @@
+const events = {};
 const commands = {};
-var client;
+const client = require('../main.js').getClient();
 
-commands.shutdown = function(client, msg, args) {
-  msg.channel.send('Shutting down...');
-  client.destroy();
+// events.message = function(msg) {
+//   if (msg.author.id == client.ownerId) {
+//     console.log(`${msg.author.username}#${msg.author.discriminator}: ${msg.cleanContent}`);
+//   }
+// }
+
+commands.ping = function(msg, args) {
+  msg.channel.send('Pong.');
 }
 
+module.exports.events = events;
 module.exports.commands = commands;
-module.exports.setup = function(passedClient) {
-  client = passedClient;
-}
