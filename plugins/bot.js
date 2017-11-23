@@ -1,4 +1,5 @@
 const commands = {};
+const config = require('../config.json');
 const client = require('../main.js').getClient();
 const restartTimeout = 3.5 * 1000;
 
