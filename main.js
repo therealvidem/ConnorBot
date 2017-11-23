@@ -15,6 +15,10 @@ module.exports.getClient = function() {
   return client;
 }
 
+module.exports.getCommands = function() {
+  return commands;
+}
+
 /*
 Iterates through the events and commands (both of which are objects) of each plugin.
 Each event is hooked onto their respective event name, and each command is put into a map,
@@ -24,8 +28,8 @@ function setupPlugin(plugin, pluginName) {
   if (plugin.setup) {
     plugin.setup();
   }
-  let pluginEvents = plugin.events;
-  let pluginCommands = plugin.commands;
+  const pluginEvents = plugin.events;
+  const pluginCommands = plugin.commands;
   for (const eventName in pluginEvents) {
     events[`${pluginName}:${eventName}`] = {
       fun: pluginEvents[eventName],
@@ -60,11 +64,12 @@ function shutdownPlugin(pluginName) {
 
 // Simply removes the events and commands of the specified plugin, then sets it back up again.
 commands.load = {
-  run: function(msg, args) {
-    let filename = `${args[0]}.js`;
-    let file = `./plugins/${filename}`;
+  'run': function(msg, args) {
+    const filename = `${args[0]}.js`;
+    const file = `./plugins/${filename}`;
+    const cachePlugin = plugins[filename];
     if (!fs.existsSync(file)) {
-      if (plugins[filename]) {
+      if (cachePlugin) {
         msg.channel.send(`Unloading plugin '${filename}' because it was deleted...`);
         shutdownPlugin(filename);
       } else {
@@ -72,12 +77,12 @@ commands.load = {
       }
       return;
     }
-    if (plugins[filename]) {
-      plugins[filename].unload();
+    if (cachePlugin && cachePlugin.unload) {
+      cachePlugin.unload();
     }
     shutdownPlugin(filename);
     delete require.cache[require.resolve(file)];
-    let plugin = require(file);
+    const plugin = require(file);
     msg.channel.send(`Loading plugin '${filename}'...`);
     setupPlugin(plugin, filename);
     msg.channel.send('Successfully loaded.');
@@ -85,9 +90,9 @@ commands.load = {
 };
 
 commands.unload = {
-  run: function(msg, args) {
-    let filename = `${args[0]}.js`;
-    let file = `./plugins/${filename}`;
+  'run': function(msg, args) {
+    const filename = `${args[0]}.js`;
+    const file = `./plugins/${filename}`;
     if (!fs.existsSync(file)) {
       msg.channel.send(`Plugin '${filename}' doesn't exist.`);
       return;
@@ -116,6 +121,33 @@ client.on('ready', () => {
 });
 
 /*
+command = {
+  'run': {
+    'subCommand1': function(),
+    'subCommand2': {
+      'subSubCommand1': function()
+    }
+  }
+}
+*/
+function getCommand(commandName, context, args) {
+  const command = context[commandName];
+  if (typeof command === 'function') {
+    return command;
+  } else if (typeof command === 'object') {
+    if (!args) return;
+    const subCommand = command[args[0]];
+    if (subCommand) {
+      return getCommand(args.shift(), command, args);
+    } else if (command['_default']) {
+      return command['_default'];
+    }
+  }
+}
+
+module.exports.getCommand = getCommand;
+
+/*
 Taken directly from the Command Handler example on the anidiots.guide for discord.js.
 Takes the args of a command by splitting it between (multiple) spaces, as well as the commandName.
 Then, if the command exists in the commands map, it'll execute it.
@@ -126,14 +158,13 @@ there's a prefix within the message.
 client.on('message', (msg) => {
   if (msg.author.bot || msg.content.indexOf(config.prefix) !== 0) return;
   const args = msg.content.slice(config.prefix.length).trim().split(/ +/g);
-  const commandName = args.shift().toLowerCase();
-  try {
-    let command = commands[commandName];
+  const commandName = args.shift();
+  const baseCommand = commands[commandName];
+  if (baseCommand) {
+    const command = getCommand('run', baseCommand, args);
     if (command) {
-      command.run(msg, args);
+      command(msg, args);
     }
-  } catch (e) {
-    console.error(e);
   }
 });
 
