@@ -66,6 +66,8 @@ function shutdownPlugin(pluginName) {
   delete plugins[pluginName];
 }
 
+module.exports.shutdownPlugin = shutdownPlugin; // For restarting
+
 // Simply removes the events and commands of the specified plugin, then sets it back up again.
 commands.load = {
   'run': function(msg, args) {

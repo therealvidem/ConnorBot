@@ -18,6 +18,7 @@ commands.restart = function(msg, args) {
     if (plugin.unload) {
       plugin.unload();
     }
+    shutdownPlugin(pluginName);
     delete require.cache[require.resolve(`./${pluginName}`)];
   }
   client.destroy().then(() => {
