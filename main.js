@@ -23,6 +23,10 @@ module.exports.getPlugins = function() {
   return plugins;
 }
 
+module.exports.shutdownPlugin = function(pluginName) {
+  shutdownPlugin(pluginName);
+}
+
 /*
 Iterates through the events and commands (both of which are objects) of each plugin.
 Each event is hooked onto their respective event name, and each command is put into a map,
