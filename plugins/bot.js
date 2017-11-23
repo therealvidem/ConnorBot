@@ -1,7 +1,7 @@
 const commands = {};
 const config = require('../config.json');
-const client = require('../main.js').getClient();
-const restartTimeout = 3.5 * 1000;
+const main = require('../main.js');
+const client = main.getClient();
 
 commands.shutdown = function(msg, args) {
   msg.channel.send('Shutting down...');
@@ -12,10 +12,20 @@ commands.shutdown = function(msg, args) {
 
 commands.restart = function(msg, args) {
   msg.channel.send('Restarting...');
+  const plugins = main.getPlugins();
+  for (const pluginName in plugins) {
+    const plugin = plugins[pluginName];
+    if (plugin.unload) {
+      plugin.unload();
+    }
+    delete require.cache[require.resolve(`./${pluginName}`)];
+  }
   client.destroy().then(() => {
-    setTimeout(function () {
-      client.login(client.token);
-    }, restartTimeout);
+    client.ownerId = config.ownerId;
+    client.prefix = config.prefix;
+    client.login(config.token).catch((error) => {
+      console.error(error);
+    }); // Not sure if we need an error here...
   });
 }
 

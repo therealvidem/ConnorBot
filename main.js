@@ -19,6 +19,10 @@ module.exports.getCommands = function() {
   return commands;
 }
 
+module.exports.getPlugins = function() {
+  return plugins;
+}
+
 /*
 Iterates through the events and commands (both of which are objects) of each plugin.
 Each event is hooked onto their respective event name, and each command is put into a map,
@@ -32,16 +36,16 @@ function setupPlugin(plugin, pluginName) {
   const pluginCommands = plugin.commands;
   for (const eventName in pluginEvents) {
     events[`${pluginName}:${eventName}`] = {
-      fun: pluginEvents[eventName],
-      eventType: eventName,
-      pluginName: pluginName
+      'fun': pluginEvents[eventName],
+      'eventType': eventName,
+      'pluginName': pluginName
     };
     client.on(eventName, events[`${pluginName}:${eventName}`].fun);
   }
   for (const commandName in pluginCommands) {
     commands[commandName] = {
-      run: pluginCommands[commandName],
-      pluginName: pluginName
+      'run': pluginCommands[commandName],
+      'pluginName': pluginName
     };
   }
   plugins[pluginName] = plugin;
@@ -171,7 +175,9 @@ client.on('message', (msg) => {
 if (config.token) {
   client.ownerId = config.ownerId;
   client.prefix = config.prefix;
-  client.login(config.token);
+  client.login(config.token).catch((error) => {
+    console.error('Invalid token');
+  });
 } else {
   console.error('Add a valid token to the "config.json"');
 }
