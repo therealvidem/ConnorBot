@@ -6,6 +6,7 @@ const events = {};
 const commands = {};
 const dir = './data/channellogger';
 const client = require('../main.js').getClient();
+let shuttingDown = false; // We need this because sometimes the bot logs "<prefix>;shutdown"
 
 function makeDir(guildDir, channelFile) {
   if (!fs.existsSync(dir)) {
@@ -17,7 +18,7 @@ function makeDir(guildDir, channelFile) {
 }
 
 function log(msg) {
-  if (!msg.guild) return;
+  if (!msg.guild || shuttingDown) return;
   const guildId = msg.guild.id;
   const channel = msg.channel;
   const channelId = channel.id;
@@ -79,6 +80,27 @@ module.exports.setup = function() {
     console.log('Loaded loggingChannels data.');
   });
 }
-module.exports.unload = function() {
-  provider.close();
+module.exports.unload = function(reason) {
+  return new Promise((resolve, reject) => {
+    if (reason === 'shutdown') {
+      shuttingDown = true;
+      const loggingChannels = client.channels.filter((channel) => {
+        return channel.type === 'text' && client.loggingChannels.get(channel.id);
+      });
+      loggingChannels.forEach((channel) => {
+        const guildDir = `${dir}/${channel.guild.id}`;
+        const channelFile = `${guildDir}/${channel.id}.log`;
+        const date = new Date();
+        let log = `*** BOT SHUTDOWN AT ${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} `;
+        log += `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}.${date.getMilliseconds()} ***\n\n`;
+        fs.appendFile(channelFile, log, function (err) {
+          if (err) {
+            console.log(err);
+          }
+        });
+      });
+    }
+    provider.close();
+    resolve();
+  });
 }

@@ -88,7 +88,7 @@ commands.load = {
       return;
     }
     if (cachePlugin && cachePlugin.unload) {
-      cachePlugin.unload();
+      cachePlugin.unload('reload');
     }
     shutdownPlugin(filename);
     delete require.cache[require.resolve(file)];
@@ -108,7 +108,7 @@ commands.unload = {
       return;
     }
     if (plugins[filename]) {
-      plugins[filename].unload();
+      plugins[filename].unload('unload');
     }
     msg.channel.send(`Unloading plugin '${filename}'...`);
     shutdownPlugin(filename);
@@ -119,14 +119,14 @@ commands.unload = {
 client.on('ready', () => {
   console.log(`Logged into ${client.guilds.size} guilds.`);
   // Simply iterates through each plugin file and sets it up.
-  fs.readdir('./plugins', function(err, files) {
+  fs.readdir('./plugins', (err, files) => {
     files
-      .filter(file => file.substr(-3) === '.js')
-      .forEach(file => {
-        let plugin = require(`./plugins/${file}`);
-        setupPlugin(plugin, file);
-        console.log(`Loaded ${file}.`);
-      });
+    .filter(file => file.substr(-3) === '.js')
+    .forEach(file => {
+      let plugin = require(`./plugins/${file}`);
+      setupPlugin(plugin, file);
+      console.log(`Loaded ${file}.`);
+    });
   });
 });
 

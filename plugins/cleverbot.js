@@ -63,6 +63,9 @@ module.exports.setup = function() {
     console.log('Loaded Cleverbot data.');
   });
 }
-module.exports.unload = function() {
-  provider.close();
+module.exports.unload = function(reason) {
+  return new Promise((resolve, reject) => {
+    provider.close();
+    resolve();
+  });
 }
