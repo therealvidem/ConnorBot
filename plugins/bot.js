@@ -11,10 +11,11 @@ commands.shutdown = function(msg, args) {
 
 commands.restart = function(msg, args) {
   msg.channel.send('Restarting...');
-  client.destroy();
-  setTimeout(function () {
-    client.login(client.token);
-  }, restartTimeout);
+  client.destroy().then(() => {
+    setTimeout(function () {
+      client.login(client.token);
+    }, restartTimeout);
+  });
 }
 
 module.exports.commands = commands;
