@@ -50,10 +50,12 @@ function log(msg) {
 events.message = log;
 
 events.messageUpdate = function(oldmsg, newmsg) {
-  oldraw = String.raw`${oldmsg.cleanContent}`;
-  newraw = String.raw`${newmsg.cleanContent}`;
+  let newmsgContentHolder = newmsg.content;
+  let oldraw = String.raw`${oldmsg.cleanContent}`;
+  let newraw = String.raw`${newmsg.cleanContent}`;
   newmsg.content = `EDIT:\nBefore: ${oldraw}\nAfter: ${newraw}`;
   log(newmsg);
+  newmsg.content = newmsgContentHolder;
 }
 
 commands.channellogger = function(msg, args) {
