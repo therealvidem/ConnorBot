@@ -4,8 +4,9 @@ const restartTimeout = 3.5 * 1000;
 
 commands.shutdown = function(msg, args) {
   msg.channel.send('Shutting down...');
-  client.destroy();
-  process.exit();
+  client.destroy().then(() => {
+    process.exit();
+  });
 }
 
 commands.restart = function(msg, args) {
