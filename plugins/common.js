@@ -32,9 +32,11 @@ commands.server = {
       msg.channel.send('', embed);
     },
     'member': function(msg, args) {
-      if (args.length < 1) return;
       const query = args.join(' ');
-      const member = msg.mentions.members.first() || utils.convertToMember(msg.channel, query);
+      let member = msg.member;
+      if (args.length > 0) {
+        member = msg.mentions.members.first() || utils.convertToMember(msg.channel, query);
+      }
       if (!member) {
         msg.channel.send(`Could not find member "${query}"`);
         return;

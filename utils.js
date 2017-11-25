@@ -37,7 +37,7 @@ module.exports.convertToMember = function(channel, arg) {
       username = removeNonASCII(username);
       displayName = removeNonASCII(displayName);
     }
-    return (username.indexOf(query) === 0 || displayName.indexOf(query) === 0 || m.user.id === query);
+    return (username.indexOf(query) !== -1 || displayName.indexOf(query) !== -1 || m.user.id === query);
   });
   return member;
 }
