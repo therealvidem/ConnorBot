@@ -62,7 +62,7 @@ module.exports.getUserProfile = function(member) {
   const creationDate = dateFormat(user.createdAt, 'dddd, mmmm dS, yyyy, h:MM:ss TT Z');
   const joinedDate = dateFormat(member.joinedAt, 'dddd, mmmm dS, yyyy, h:MM:ss TT Z');
   const roles = member.roles.array().slice(1);
-  const rolesString = roles ? roles.join(', ') : 'None';
+  const rolesString = roles.length > 0 ? roles.join(', ') : 'None';
   const embed = new Discord.RichEmbed()
                 .setThumbnail(user.displayAvatarURL)
                 .setColor(hexColor)
