@@ -65,6 +65,7 @@ events.message = function(msg) {
   }
 }
 
+module.exports.commands = commands;
 module.exports.events = events;
 module.exports.setup = function() {
   client.clownfish = new Enmap({provider: provider});
