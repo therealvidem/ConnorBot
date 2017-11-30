@@ -3,6 +3,7 @@ const Enmap = require('enmap');
 const EnmapLevel = require('enmap-level');
 const provider = new EnmapLevel({name: 'clownfish'});
 const events = {};
+const commands = {};
 const client = require('../main.js').getClient();
 const chance = Math.floor(Math.random() * 50);
 const cooldown = 30 * 1000;
@@ -30,6 +31,13 @@ const usersCooldown = new Set();
 
 function randomFromList(list) {
   return list[Math.floor(Math.random() * list.length)];
+}
+
+commands.clownfish = {
+  'points': function(msg, args) {
+    const pointsString = client.clownfish[msg.author.id] ? `You have ${client.clownfish[msg.author.id]} points.` : 'You don\'t have any points.';
+    msg.channel.send(pointsString);
+  }
 }
 
 events.message = function(msg) {
