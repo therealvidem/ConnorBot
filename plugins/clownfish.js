@@ -9,7 +9,7 @@ const main = require('../main.js');
 const client = main.getClient();
 const chance = Math.floor(Math.random() * 50);
 const cooldown = 30 * 1000;
-const debug = true;
+const debug = false;
 const flags = {
   'es': '🇪🇸',
   'fr': '🇫🇷',
