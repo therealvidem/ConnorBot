@@ -29,7 +29,7 @@ commands.server = {
     },
     'owner': function(msg, args) {
       const embed = utils.getUserProfile(msg.guild.owner);
-      msg.channel.send('', embed);
+      msg.channel.send(embed);
     },
     'member': function(msg, args) {
       const query = args.join(' ');
@@ -42,7 +42,7 @@ commands.server = {
         return;
       }
       const embed = utils.getUserProfile(member);
-      msg.channel.send('', embed);
+      msg.channel.send(embed);
     }
   }
 }

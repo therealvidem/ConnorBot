@@ -42,14 +42,19 @@ module.exports.convertToMember = function(channel, arg) {
   return member;
 }
 
-module.exports.getEmbedFromObject = function(obj, inline, title) {
-  const embed = new Discord.RichEmbed();
-  if (title) {
-    embed.setTitle(title);
-  }
+module.exports.getEmbedFromObject = function(obj, inline, existingEmbed) {
+  const embed = existingEmbed || new Discord.RichEmbed();
   for (const key in obj) {
     embed.addField(key, obj[key], inline);
   }
+  return embed;
+}
+
+module.exports.getBaseProfile = function(member, color, existingEmbed) {
+  const embed = existingEmbed || new Discord.RichEmbed();
+  const nickname = member.nickname ? member.nickname : member.displayName;
+  embed.setColor(color || member.displayHexColor)
+  embed.setAuthor(nickname, member.user.displayAvatarURL);
   return embed;
 }
 

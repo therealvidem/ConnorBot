@@ -78,7 +78,7 @@ commands.alias = {
       const args = aliases[alias].args;
       aliasesTable[alias] = `${client.prefix}${commandName} ${args.join(' ')}`;
     }
-    msg.channel.send('', utils.getEmbedFromObject(aliasesTable));
+    msg.channel.send(utils.getEmbedFromObject(aliasesTable));
   }
 };
 

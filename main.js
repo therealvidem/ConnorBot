@@ -27,6 +27,36 @@ module.exports.shutdownPlugin = function(pluginName) {
   shutdownPlugin(pluginName);
 }
 
+function isCommand(msg) {
+  return !msg.author.bot && msg.content.indexOf(config.prefix) === 0;
+}
+
+function promptYesNo(msg, waitTime, content) {
+  return new Promise((resolve, reject) => {
+    msg.channel.send(content).then(() => {
+      msg.channel.awaitMessages(response => response.author === msg.author && (response.content.toLowerCase() === 'yes' || response.content.toLowerCase() === 'no'), {
+        max: 1,
+        time: waitTime,
+        errors: ['time']
+      })
+      .then((collected) => {
+        const responseMsg = collected.first();
+        const response = responseMsg.content.toLowerCase() === 'yes';
+        resolve(response, responseMsg);
+      })
+      .catch((collected) => {
+        const responseMsg = collected.first();
+        const response = responseMsg.content.toLowerCase() === 'yes';
+        resolve(response, responseMsg);
+      });
+    });
+  });
+}
+
+module.exports.isCommand = isCommand;
+
+module.exports.promptYesNo = promptYesNo;
+
 /*
 Iterates through the events and commands (both of which are objects) of each plugin.
 Each event is hooked onto their respective event name, and each command is put into a map,
@@ -166,7 +196,7 @@ However, before all of this happens, it checks to make sure the messanger isn't 
 there's a prefix within the message.
 */
 client.on('message', (msg) => {
-  if (msg.author.bot || msg.content.indexOf(config.prefix) !== 0) return;
+  if (!isCommand(msg)) return;
   const args = msg.content.slice(config.prefix.length).trim().split(/ +/g);
   const commandName = args.shift();
   const baseCommand = commands[commandName];
