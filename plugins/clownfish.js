@@ -22,7 +22,7 @@ const languages = {
 };
 const fullLanguages = {
   'spanish': 'es',
-  'france': 'fr',
+  'french': 'fr',
   'japanese': 'ja',
   'khmer': 'km',
   'chinese': 'zh-cn',
