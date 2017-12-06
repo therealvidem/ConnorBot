@@ -5,8 +5,7 @@ const provider = new EnmapLevel({name: 'clownfish'});
 const events = {};
 const commands = {};
 const utils = require('../utils.js');
-const main = require('../main.js');
-const client = main.getClient();
+const client = require('../main.js').getClient();
 const chance = Math.floor(Math.random() * 50);
 const cooldown = 30 * 1000;
 const debug = false;
@@ -54,7 +53,7 @@ function incrementPoints(id, language) {
 }
 
 events.message = function(msg) {
-  if (msg.content.length < 1 || (!debug && usersCooldown.has(msg.author.id)) || msg.author.bot || main.isCommand(msg)) return;
+  if (msg.content.length < 1 || (!debug && usersCooldown.has(msg.author.id)) || msg.author.bot || client.isCommand(msg)) return;
   const num = Math.floor(Math.random() * 50);
   const language = randomFromList(Object.keys(languages));
   const flag = languages[language];
@@ -107,7 +106,7 @@ commands.clownfish = {
     }
   },
   'reset': function(msg, args) {
-    main.promptYesNo(msg, 10 * 1000, 'Are you sure you want to delete ALL of your clownfish data? (yes/no)')
+    client.promptYesNo(msg, 10 * 1000, 'Are you sure you want to delete ALL of your clownfish data? (yes/no)')
     .then(
       (response, responseMsg) => {
         console.log(response);

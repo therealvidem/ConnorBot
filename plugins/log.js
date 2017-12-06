@@ -60,6 +60,7 @@ events.messageUpdate = function(oldmsg, newmsg) {
 }
 
 commands.channellogger = function(msg, args) {
+  if (!client.checkOwner(msg)) return;
   const channel = msg.channel;
   let logging = client.loggingChannels.get(channel.id);
   if (logging === undefined) {

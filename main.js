@@ -31,6 +31,18 @@ function isCommand(msg) {
   return !msg.author.bot && msg.content.indexOf(config.prefix) === 0;
 }
 
+function checkOwner(msg) {
+  if (!isOwner(msg.author)) {
+    msg.channel.send('You\'re not allowed to use that command.');
+    return false;
+  }
+  return true;
+}
+
+function isOwner(author) {
+  return author.id == client.ownerId;
+}
+
 function promptYesNo(msg, waitTime, content) {
   return new Promise((resolve, reject) => {
     msg.channel.send(content).then(() => {
@@ -53,9 +65,11 @@ function promptYesNo(msg, waitTime, content) {
   });
 }
 
-module.exports.isCommand = isCommand;
+client.isCommand = isCommand;
 
-module.exports.promptYesNo = promptYesNo;
+client.isOwner = isOwner;
+
+client.promptYesNo = promptYesNo;
 
 /*
 Iterates through the events and commands (both of which are objects) of each plugin.

@@ -47,39 +47,5 @@ commands.server = {
   }
 }
 
-commands.bot = {
-  'set': {
-    'avatar': function(msg, args) {
-      const attachment = msg.attachments.first();
-      const url = attachment ? attachment.url : args[0];
-      if (!url) {
-        msg.channel.send(`Correct usage: ${client.prefix}bot set avatar <url> (or add an attachment after ${client.prefix}bot set avatar)`);
-        return;
-      }
-      client.user.setAvatar(url)
-      .then(user => {
-        msg.channel.send('Successfully set avatar');
-      })
-      .catch(err => {
-        msg.channel.send('Input a valid URL');
-      });
-    },
-    'name': function(msg, args) {
-      const newName = args[0];
-      if (!newName) {
-        msg.channel.send(`Correct usage: ${client.prefix}bot set name <newName>`);
-        return;
-      }
-      client.user.setUsername(newName)
-      .then(user => {
-        msg.channel.send('Successfully set name');
-      })
-      .catch(err => {
-        msg.channel.send('An error occured while trying to set name');
-      });
-    }
-  }
-}
-
 module.exports.events = events;
 module.exports.commands = commands;
