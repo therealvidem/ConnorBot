@@ -43,7 +43,7 @@ commands.cleverbot = function(msg, args) {
 
 commands.setcleverbot = function(msg, args) {
   let key = args[0];
-  if (!key || !client.checkOwner(msg))) return;
+  if (!key || !client.checkOwner(msg)) return;
   if (msg.channel.type != 'dm') {
     msg.channel.send('You can only use that command in DMs');
     return;
