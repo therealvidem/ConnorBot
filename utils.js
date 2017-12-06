@@ -11,6 +11,14 @@ function removeNonASCII(arg) {
   return arg.replace(/[^\x00-\x7F]/g, '').trim();
 }
 
+module.exports.invertObject = function(obj) {
+  const newObj = {};
+  for (const prop in obj) {
+    newObj[obj[prop]] = prop;
+  }
+  return newObj;
+}
+
 module.exports.convertToMember = function(channel, arg) {
   const query = arg.toLowerCase();
   const members = channel.members;
