@@ -6,6 +6,7 @@ const presenceFormat = {
   'idle': 'Idle',
   'dnd': 'Do Not Disturb'
 };
+const MENTIONS_PATTERN = new RegExp('<@!?([0-9]+)>$')
 
 function removeNonASCII(arg) {
   return arg.replace(/[^\x00-\x7F]/g, '').trim();
@@ -20,6 +21,11 @@ module.exports.invertObject = function(obj) {
 }
 
 module.exports.convertToMember = function(channel, arg) {
+  if (!arg) return;
+  const mention = MENTIONS_PATTERN.exec(arg);
+  if (mention) {
+    return channel.guild.members.get(mention[1]);
+  }
   const query = arg.toLowerCase();
   const members = channel.members;
   const discriminator = (arg.length > 5 && arg.indexOf('#') == arg.length - 5) ? arg.slice(-4) : undefined;
@@ -90,3 +96,5 @@ module.exports.getUserProfile = function(member) {
                 .addField('Roles', rolesString);
   return embed;
 }
+
+module.exports.MENTIONS_PATTERN = MENTIONS_PATTERN;
