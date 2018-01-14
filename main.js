@@ -67,6 +67,8 @@ function promptYesNo(msg, waitTime, content) {
 
 client.isCommand = isCommand;
 
+client.checkOwner = checkOwner;
+
 client.isOwner = isOwner;
 
 client.promptYesNo = promptYesNo;
