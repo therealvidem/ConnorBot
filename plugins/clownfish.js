@@ -204,6 +204,29 @@ commands.clownfish = {
         msg.channel.send(`An error has occured: ${err}`);
         console.error(err);
       });
+    },
+    'to': function(msg, args) {
+      let languageQuery = args[0];
+      const text = args.slice(1).join(' ');
+      if (!languageQuery || !text) {
+        msg.channel.send(`Correct usage: ${client.prefix}clownfish translate to <language> <text>`);
+        return;
+      }
+      languageQuery = languageQuery.toLowerCase();
+      const language = Object.keys(languages).includes(languageQuery) ? languageQuery : flagsIndex[languageQuery] || fullLanguages[languageQuery];
+      if (!language) {
+        msg.channel.send('I\'m sorry, I don\'t have that language in my database.');
+        return;
+      }
+      const flag = languages[language];
+      translate(text, {from: 'en', to: language})
+      .then(res => {
+        msg.channel.send(`( (${flag}) ${res.text} )`);
+      })
+      .catch(err => {
+        msg.channel.send(`An error has occured: ${err}`);
+        console.error(err);
+      });
     }
   }
 }
