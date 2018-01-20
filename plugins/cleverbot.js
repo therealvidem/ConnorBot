@@ -4,6 +4,7 @@ const Cleverbot = require('cleverbot');
 const Enmap = require('enmap');
 const EnmapLevel = require('enmap-level');
 const provider = new EnmapLevel({name: 'cleverBot'});
+const Discord = require('discord.js')
 const client = require('../main.js').getClient();
 const events = {};
 const commands = {};
@@ -33,15 +34,25 @@ events.message = function(msg) {
   // Since the message could look like "@Bot hello there", we have to
   // split the content into an array of strings, delete the mention part,
   // then join the strings together again, and finally pass in the result: "hello there".
-  let content = msg.content.trim().split(/ +/g);
-  let mention = content.shift()
-  if (!content || !Discord.MessageMentions.USERS_PATTERN.exec(mention)) return;
-  reply(content.join(' '), msg.channel, msg.author.id);
+  let content = msg.content.trim();
+  let test_mention = Discord.MessageMentions.USERS_PATTERN.exec(content);
+  let cleanContent = msg.cleanContent.trim().split(/ +/g).slice(1);
+  if (!cleanContent || !test_mention || test_mention.index !== 0 || content.charAt(test_mention.index + test_mention[0].length) !== ' ') return;
+  reply(cleanContent.join(' '), msg.channel, msg.author.id);
 }
 
 commands.cleverbot = function(msg, args) {
   if (!args[0]) return;
-  reply(args.join(' '), msg.channel, msg.author.id);
+  let content = msg.cleanContent;
+  content = content.slice(client.prefix.length + 10); // "c;cleverbot test" -> "test"
+  reply(content, msg.channel, msg.author.id);
+}
+
+commands.resetcs = function(msg, args) {
+  if (userStates[msg.author.id]) {
+    delete userStates[msg.author.id];
+  }
+  msg.channel.send('Successfully cleared our conversation');
 }
 
 commands.setcleverbot = function(msg, args) {
