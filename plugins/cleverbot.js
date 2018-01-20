@@ -36,6 +36,7 @@ events.message = function(msg) {
   // then join the strings together again, and finally pass in the result: "hello there".
   let content = msg.content.trim();
   let test_mention = Discord.MessageMentions.USERS_PATTERN.exec(content);
+  Discord.MessageMentions.USERS_PATTERN.lastIndex = 0;
   let cleanContent = msg.cleanContent.trim().split(/ +/g).slice(1);
   if (!cleanContent || !test_mention || test_mention.index !== 0 || content.charAt(test_mention.index + test_mention[0].length) !== ' ') return;
   reply(cleanContent.join(' '), msg.channel, msg.author.id);
