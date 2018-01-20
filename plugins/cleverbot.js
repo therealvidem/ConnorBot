@@ -33,11 +33,14 @@ events.message = function(msg) {
   // Since the message could look like "@Bot hello there", we have to
   // split the content into an array of strings, delete the mention part,
   // then join the strings together again, and finally pass in the result: "hello there".
-  let content = msg.content.trim().split(/ +/g).slice(1);
+  let content = msg.content.trim().split(/ +/g);
+  let mention = content.shift()
+  if (!content || !Discord.MessageMentions.USERS_PATTERN.exec(mention)) return;
   reply(content.join(' '), msg.channel, msg.author.id);
 }
 
 commands.cleverbot = function(msg, args) {
+  if (!args[0]) return;
   reply(args.join(' '), msg.channel, msg.author.id);
 }
 
