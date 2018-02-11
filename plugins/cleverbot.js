@@ -1,4 +1,3 @@
-const https = require('https');
 const querystring = require('querystring');
 const Cleverbot = require('cleverbot');
 const Enmap = require('enmap');
