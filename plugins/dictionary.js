@@ -21,7 +21,6 @@ function parseSynonymEntries(entries) {
   let text = '';
   for (let i = 0; i < entries.length; i++) {
     let entry = entries[i];
-    console.log(entry);
     for (let j = 0; j < entry.senses.length; j++) {
       let sense = entry.senses[j];
       let synonyms = sense.synonyms.map(s => s.text).join(', ');
