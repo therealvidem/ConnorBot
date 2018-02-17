@@ -17,7 +17,12 @@ const languages = {
   'zh-cn': '🇨🇳',
   'de': '🇩🇪',
   'ko': '🇰🇷',
-  'ru': '🇷🇺'
+  'ru': '🇷🇺',
+  'el': '🇬🇷',
+  'it': '🇮🇹',
+  'la': '🔤',
+  'pt': '🇵🇹',
+  'lo': '🇱🇦'
 };
 const fullLanguages = {
   'spanish': 'es',
@@ -27,7 +32,12 @@ const fullLanguages = {
   'chinese': 'zh-cn',
   'german': 'de',
   'korean': 'ko',
-  'russian': 'ru'
+  'russian': 'ru',
+  'greek': 'el',
+  'italian': 'it',
+  'latin': 'la',
+  'portuguese': 'pt',
+  'laotian': 'lo'
 }
 const flagsIndex = utils.invertObject(languages);
 const usersCooldown = new Set();
