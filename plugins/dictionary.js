@@ -115,6 +115,9 @@ commands.dictionary = {
     client.dictionary.set('key', key);
     msg.channel.send(`Successfully set id to ${id} and key to ${key}`);
   },
+  'ipa': function(msg, args) {
+    msg.channel.send('https://images.sampletemplates.com/wp-content/uploads/2016/03/05123102/Phonetic-Alphabets-Reference-Chart.jpg');
+  },
   'define': function(msg, args) {
     const word = args.join(' ');
     if (!word) {
@@ -127,12 +130,14 @@ commands.dictionary = {
         if (lexicalEntries) {
           for (let i = 0; i < lexicalEntries.length; i++) {
             setTimeout(() => {
-              const lexicalEntry = lexicalEntries[i]
+              const lexicalEntry = lexicalEntries[i];
               const text = parseDefEntries(lexicalEntry.entries);
+              const pronunciations = lexicalEntry.pronunciations.map(p => p.phoneticSpelling).join('] [');
+              const pronunciationString = ("[" + pronunciations + "]") || "";
               if (text) {
                 let embed = new Discord.RichEmbed()
                 .setColor(0x00bdf2)
-                .setTitle(`${word} (${lexicalEntry.lexicalCategory.toLowerCase()})`)
+                .setTitle(`${word} (${lexicalEntry.lexicalCategory.toLowerCase()}) ${pronunciationString}`)
                 .setDescription('```json\n' + text + '```')
                 .setFooter('Using the Oxford English Dictionary');
                 msg.channel.send(embed);
