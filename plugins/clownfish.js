@@ -24,7 +24,8 @@ const languages = {
   'la': '🔤',
   'pt': '🇵🇹',
   'lo': '🇱🇦',
-  'ar': '🇦🇪'
+  'ar': '🇦🇪',
+  'sm': '🇼🇸'
 };
 const fullLanguages = {
   'spanish': 'es',
@@ -40,7 +41,8 @@ const fullLanguages = {
   'latin': 'la',
   'portuguese': 'pt',
   'laotian': 'lo',
-  'arabic': 'ar'
+  'arabic': 'ar',
+  'samoan', 'sm'
 }
 const flagsIndex = utils.invertObject(languages);
 const usersCooldown = new Set();
