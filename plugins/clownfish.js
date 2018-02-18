@@ -1,3 +1,4 @@
+const Discord = require('discord.js');
 const translate = require('google-translate-api');
 const Enmap = require('enmap');
 const EnmapLevel = require('enmap-level');
@@ -19,7 +20,7 @@ const languages = {
   'ko': '🇰🇷',
   'ru': '🇷🇺',
   'el': '🇬🇷',
-  'it': '🇮🇹',
+  'it': '🇮🇹',
   'la': '🔤',
   'pt': '🇵🇹',
   'lo': '🇱🇦'
@@ -117,6 +118,17 @@ events.message = function(msg) {
 }
 
 commands.clownfish = {
+  'languages': function(msg, args) {
+    let embed = new Discord.RichEmbed()
+    .setColor(msg.author.displayHexColor)
+    .setTitle('Languages available for the clownfish plugin');
+    for (let key in fullLanguages) {
+      const language = fullLanguages[key];
+      const flag = languages[language];
+      embed.addField(key.charAt(0).toUpperCase() + key.slice(1), `(${flag}) ${language}`, true);
+    }
+    msg.channel.send(embed);
+  },
   'points': function(msg, args) {
     const authorData = points[msg.author.id];
     const arg0 = args[0];
