@@ -19,6 +19,8 @@ function shutdownProcess(msg, args, reason) {
   });
 }
 
+module.exports.shutdownProcess = shutdownProcess;
+
 commands.shutdown = function(msg, args) {
   msg.channel.send('Shutting down...')
   .then(shutdownProcess(msg, args, 'shutdown'))
