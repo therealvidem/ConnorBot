@@ -120,7 +120,7 @@ events.message = function(msg) {
 commands.clownfish = {
   'languages': function(msg, args) {
     let embed = new Discord.RichEmbed()
-    .setColor(msg.author.displayHexColor)
+    .setColor(msg.member.displayHexColor)
     .setTitle('Languages available for the clownfish plugin');
     for (let key in fullLanguages) {
       const language = fullLanguages[key];
