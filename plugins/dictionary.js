@@ -7,6 +7,11 @@ const EnmapLevel = require('enmap-level');
 const provider = new EnmapLevel({name: 'dictionary'});
 const client = require('../main.js').getClient();
 const utils = require('../utils.js');
+const users = {};
+const validLanguages = {
+  'en': 'English',
+  'es': 'Spanish'
+};
 
 function errorNotify(msg, err) {
   if (err === 404) {
@@ -115,6 +120,24 @@ commands.dictionary = {
     client.dictionary.set('key', key);
     msg.channel.send(`Successfully set id to ${id} and key to ${key}`);
   },
+  'setlanguage': function(msg, args) {
+    const language = args[0];
+    if (!language || !validLanguages[language]) {
+      msg.channel.send(`That is not a valid language. Do ${client.prefix}dictionary languages to list valid languages.`);
+      return;
+    }
+    users[msg.author] = language;
+    msg.channel.send(`Successfully set your language to ${language}`);
+  },
+  'languages': function(msg, args) {
+    let embed = new Discord.RichEmbed()
+    .setColor(msg.member.displayHexColor)
+    .setTitle('Languages available for the dictionary plugin');
+    for (let language in validLanguages) {
+      embed.addField(`${language}`, `${validLanguages[language]}`);
+    }
+    msg.channel.send(embed);
+  },
   'ipa': function(msg, args) {
     msg.channel.send('https://images.sampletemplates.com/wp-content/uploads/2016/03/05123102/Phonetic-Alphabets-Reference-Chart.jpg');
   },
@@ -124,7 +147,8 @@ commands.dictionary = {
       msg.channel.send(`Correct usage: ${client.prefix}dictionary define <word>`);
       return;
     }
-    get(msg, `entries/en/${word}`).then(
+    const language = users[msg.author] || 'en';
+    get(msg, `entries/${language}/${word}`).then(
       (data) => {
         const lexicalEntries = data.results[0].lexicalEntries;
         if (lexicalEntries) {
@@ -132,8 +156,11 @@ commands.dictionary = {
             setTimeout(() => {
               const lexicalEntry = lexicalEntries[i];
               const text = parseDefEntries(lexicalEntry.entries);
-              const pronunciations = lexicalEntry.pronunciations.map(p => p.phoneticSpelling).join('] [');
-              const pronunciationString = ("[" + pronunciations + "]") || "";
+              let pronunciationString = '';
+              if (lexicalEntry.pronunciations) {
+                const pronunciations = lexicalEntry.pronunciations.map(p => p.phoneticSpelling).join('] [');
+                pronunciationString = ("[" + pronunciations + "]");
+              }
               if (text) {
                 let embed = new Discord.RichEmbed()
                 .setColor(0x00bdf2)
@@ -159,7 +186,8 @@ commands.dictionary = {
       msg.channel.send(`Correct usage: ${client.prefix}dictionary synonyms <word>`);
       return;
     }
-    get(msg, `entries/en/${word}/synonyms`).then(
+    const language = users[msg.author] || 'en';
+    get(msg, `entries/${language}/${word}/synonyms`).then(
       (data) => {
         const lexicalEntries = data.results[0].lexicalEntries;
         if (lexicalEntries) {
