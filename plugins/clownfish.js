@@ -40,7 +40,7 @@ const fullLanguages = {
   'latin': 'la',
   'portuguese': 'pt',
   'laotian': 'lo',
-  'arabic', 'ar'
+  'arabic': 'ar'
 }
 const flagsIndex = utils.invertObject(languages);
 const usersCooldown = new Set();
