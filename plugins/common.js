@@ -18,31 +18,130 @@ commands.echo = function(msg, args) {
   msg.channel.send(args.join(' '));
 }
 
-function sendProperty(msg, obj, prop) {
-  msg.channel.send(obj[prop] ? obj[prop].toString() : `Could not get ${prop} from the guild`);
+function sendProperty(msg, obj, prop, name) {
+  msg.channel.send(obj[prop] ? obj[prop].toString() : `Could not get ${prop} from ${name}`);
+}
+
+function getMember(msg, args) {
+  const query = args.join(' ');
+  let member = msg.member;
+  if (args.length > 0) {
+    member = msg.mentions.members.first() || utils.convertToMember(msg.channel, query);
+  }
+  if (!member) {
+    msg.channel.send(`Could not find member "${query}"`);
+    return;
+  }
+  return member;
+}
+
+function getRoleAndMember(msg, args) {
+  let query;
+  let member = msg.mentions.members.first() || utils.convertToMember(msg.channel, args[0]);
+  // Default to message author if member not found
+  if (!member) {
+    member = msg.member;
+    query = args.join(' ');
+  } else {
+    query = args.slice(1).join(' ');
+  }
+  const role = utils.convertToRole(msg.guild, query)
+  if (!role) {
+    msg.channel.send(`Could not find role "${query}"`);
+    return;
+  }
+  return {
+    'role': role,
+    'member': member
+  }
+}
+
+function checkRolePermissions(msg, member, role) {
+  if (msg.guild.me.highestRole.comparePositionTo(role) < 0) {
+    msg.channel.send('I do not have permission to add that role');
+    return false;
+  }
+  if (msg.member.highestRole.comparePositionTo(role) < 0) {
+    msg.channel.send('You do not have permission to add that role');
+    return false;
+  }
+  return true;
 }
 
 commands.server = {
   'get': {
     'image': function(msg, args) {
-      sendProperty(msg, msg.guild, 'iconURL');
+      sendProperty(msg, msg.guild, 'iconURL', 'this guild');
     },
     'owner': function(msg, args) {
       const embed = utils.getUserProfile(msg.guild.owner);
       msg.channel.send(embed);
     },
     'member': function(msg, args) {
-      const query = args.join(' ');
-      let member = msg.member;
-      if (args.length > 0) {
-        member = msg.mentions.members.first() || utils.convertToMember(msg.channel, query);
-      }
-      if (!member) {
-        msg.channel.send(`Could not find member "${query}"`);
-        return;
-      }
+      let member = getMember(msg, args);
+      if (!member) return;
       const embed = utils.getUserProfile(member);
       msg.channel.send(embed);
+    }
+  }
+}
+
+commands.member = {
+  'get': {
+    'avatar': function(msg, args) {
+      const member = getMember(msg, args);
+      if (!member) return;
+      const user = member.user;
+      sendProperty(msg, user, 'avatarURL', user.tag);
+    },
+    'id': function(msg, args) {
+      const member = getMember(msg, args);
+      if (!member) return;
+      const user = member.user;
+      sendProperty(msg, user, 'id', user.tag);
+    },
+    'username': function(msg, args) {
+      const member = getMember(msg, args);
+      if (!member) return;
+      msg.channel.send(user.tag);
+    },
+    'nickname': function(msg, args) {
+      const member = getMember(msg, args);
+      if (!member) return;
+      const name = member.nickname || member.user.tag;
+      msg.channel.send(name);
+    }
+  },
+  'add': {
+    'role': function(msg, args) {
+      const roleAndMember = getRoleAndMember(msg, args);
+      if (!roleAndMember) return;
+      const role = roleAndMember.role;
+      const member = roleAndMember.member;
+      if (member.roles.has(role.id)) {
+        msg.channel.send(`${member} already has that role`);
+        return;
+      }
+      if (!checkRolePermissions(msg, member, role)) return;
+      member.addRole(role).then(() => {
+        msg.channel.send('Successfully added role');
+      });
+    }
+  },
+  'remove': {
+    'role': function(msg, args) {
+      const roleAndMember = getRoleAndMember(msg, args);
+      if (!roleAndMember) return;
+      const role = roleAndMember.role;
+      const member = roleAndMember.member;
+      if (!member.roles.has(role.id)) {
+        msg.channel.send(`${member} does not have that role`);
+        return;
+      }
+      if (!checkRolePermissions(msg, member, role)) return;
+      member.removeRole(role).then(() => {
+        msg.channel.send('Successfully removed role');
+      });
     }
   }
 }

@@ -20,6 +20,21 @@ module.exports.invertObject = function(obj) {
   return newObj;
 }
 
+module.exports.convertToRole = function(guild, arg) {
+  if (!arg) return;
+  const query = arg.toLowerCase();
+  const roles = guild.roles;
+  // First, try to find by id
+  let role = roles.get(arg);
+  if (!role) {
+    // Second, try to find by name
+    role = roles.find((r) => {
+      return r.name.toLowerCase() === arg;
+    });
+  }
+  return role;
+}
+
 module.exports.convertToMember = function(channel, arg) {
   if (!arg) return;
   const mention = MENTIONS_PATTERN.exec(arg);
@@ -74,7 +89,7 @@ module.exports.getBaseProfile = function(member, color, existingEmbed) {
 
 module.exports.getUserProfile = function(member) {
   const user = member.user;
-  const nameTag = `${user.username}#${user.discriminator}`;
+  const nameTag = user.tag;
   const hexColor = member.displayHexColor;
   const nickname = member.nickname ? member.nickname : member.displayName;
   const game = user.presence.game ? user.presence.game.name : 'Nothing';

@@ -8,7 +8,7 @@ const client = require('../main.js').getClient();
 const events = {};
 const commands = {};
 const userStates = {};
-let cleverbot;
+let cleverBot;
 
 function reply(msg, channel, userId) {
   channel.startTyping();
