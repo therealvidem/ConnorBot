@@ -57,11 +57,11 @@ function getRoleAndMember(msg, args) {
 }
 
 function checkRolePermissions(msg, member, role) {
-  if (msg.guild.me.highestRole.comparePositionTo(role) < 0) {
+  if (!msg.guild.me.hasPermission('MANAGE_ROLES') || msg.guild.me.highestRole.comparePositionTo(role) < 0) {
     msg.channel.send('I do not have permission to add that role');
     return false;
   }
-  if (msg.member.highestRole.comparePositionTo(role) < 0) {
+  if (!msg.member.hasPermission('MANAGE_ROLES') || msg.member.highestRole.comparePositionTo(role) < 0) {
     msg.channel.send('You do not have permission to add that role');
     return false;
   }
