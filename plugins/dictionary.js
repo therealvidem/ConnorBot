@@ -7,7 +7,6 @@ const EnmapLevel = require('enmap-level');
 const provider = new EnmapLevel({name: 'dictionary'});
 const client = require('../main.js').getClient();
 const utils = require('../utils.js');
-const users = {};
 const validLanguages = {
   'en': 'English',
   'es': 'Spanish'
@@ -24,17 +23,40 @@ function errorNotify(msg, err) {
 
 function parseSynonymEntries(entries) {
   let text = '';
+  let exceedsLimit = false;
   for (let i = 0; i < entries.length; i++) {
+    if (exceedsLimit) break;
     let entry = entries[i];
     for (let j = 0; j < entry.senses.length; j++) {
+      if (exceedsLimit) break;
       let sense = entry.senses[j];
-      let synonyms = sense.synonyms.map(s => s.text).join(', ');
-      let subsesnses = sense.subsesnses;
+      let synonyms = '';
+      for (let k = 0; k < sense.synonyms.length; k++) {
+        let synonymText = sense.synonyms[k].text;
+        if ((text + synonymText + ', ').length >= 2020) {
+          exceedsLimit = true;
+          break;
+        } else {
+          synonyms += (sense.synonyms[k].text + ', ');
+        }
+      }
       text += `${synonyms}\n`;
+      let subsesnses = sense.subsesnses;
       if (subsesnses) {
-        for (let k = 0; k < subsesnses.length; k++) {
+        for (let l = 0; l < subsesnses.length; l++) {
+          if (exceedsLimit) break;
           let subsense = subsesnses[k];
-          let subSynonyms = subsense.synonyms.map(s => s.text).join(', ');
+          let subSynonyms = '';
+          for (let m = 0; m < subsense.synonyms.length; m++) {
+            if (exceedsLimit) break;
+            let subSynonymText = subsense.synonyms[m].text;
+            if ((text + subSynonymText + ', ').length >= 2020) {
+              exceedsLimit = true;
+              break;
+            } else {
+              synonyms += (subsense.synonyms[m].text + ', ');
+            }
+          }
           let registers = subsense.registers ? subsense.registers.join(' ') : '';
           let regions = subsense.regions ? subsense.regions.join(' ') : '';
           text += registers || regions ? `${regions} ${registers}: ` : '';
@@ -70,7 +92,7 @@ function parseDefEntries(entries) {
   return text;
 }
 
-function get(msg, path) {
+function get(path) {
   const options = {
     hostname: 'od-api.oxforddictionaries.com',
     port: 443,
@@ -120,15 +142,6 @@ commands.dictionary = {
     client.dictionary.set('key', key);
     msg.channel.send(`Successfully set id to ${id} and key to ${key}`);
   },
-  'setlanguage': function(msg, args) {
-    const language = args[0];
-    if (!language || !validLanguages[language]) {
-      msg.channel.send(`That is not a valid language. Do ${client.prefix}dictionary languages to list valid languages.`);
-      return;
-    }
-    users[msg.author] = language;
-    msg.channel.send(`Successfully set your language to ${language}`);
-  },
   'languages': function(msg, args) {
     let embed = new Discord.RichEmbed()
     .setColor(msg.member.displayHexColor)
@@ -142,13 +155,22 @@ commands.dictionary = {
     msg.channel.send('https://images.sampletemplates.com/wp-content/uploads/2016/03/05123102/Phonetic-Alphabets-Reference-Chart.jpg');
   },
   'define': function(msg, args) {
-    const word = args.join(' ');
+    let word = args.join('_');
+    let plain_word = args.join(' ');
     if (!word) {
-      msg.channel.send(`Correct usage: ${client.prefix}dictionary define <word>`);
+      msg.channel.send(`Correct usage: ${client.prefix}dictionary define <word> [$language]`);
       return;
     }
-    const language = users[msg.author] || 'en';
-    get(msg, `entries/${language}/${word}`).then(
+    let language = 'en';
+    if (args.length > 1) {
+      full_arg = args[args.length - 1];
+      if (full_arg.charAt(0) === '$' && validLanguages.hasOwnProperty(language)) {
+        language = args[args.length - 1].slice(1);
+        word = args.slice(0, -1).join('_');
+        plain_word = args.slice(0, -1).join(' ');
+      }
+    }
+    get(`entries/${language}/${word}`).then(
       (data) => {
         const lexicalEntries = data.results[0].lexicalEntries;
         if (lexicalEntries) {
@@ -164,7 +186,7 @@ commands.dictionary = {
               if (text) {
                 let embed = new Discord.RichEmbed()
                 .setColor(0x00bdf2)
-                .setTitle(`${word} (${lexicalEntry.lexicalCategory.toLowerCase()}) ${pronunciationString}`)
+                .setTitle(`${plain_word} (${lexicalEntry.lexicalCategory.toLowerCase()}) ${pronunciationString}`)
                 .setDescription('```json\n' + text + '```')
                 .setFooter('Using the Oxford English Dictionary');
                 msg.channel.send(embed);
@@ -181,13 +203,22 @@ commands.dictionary = {
     );
   },
   'synonyms': function(msg, args) {
-    const word = args.join(' ');
+    let word = args.join('_');
+    let plain_word = args.join(' ');
     if (!word) {
-      msg.channel.send(`Correct usage: ${client.prefix}dictionary synonyms <word>`);
+      msg.channel.send(`Correct usage: ${client.prefix}dictionary synonyms <word> [$language]`);
       return;
     }
-    const language = users[msg.author] || 'en';
-    get(msg, `entries/${language}/${word}/synonyms`).then(
+    let language = 'en';
+    if (args.length > 1) {
+      full_arg = args[args.length - 1];
+      if (full_arg.charAt(0) === '$' && validLanguages.hasOwnProperty(language)) {
+        language = args[args.length - 1].slice(1);
+        word = args.slice(0, -1).join('_');
+        plain_word = args.slice(0, -1).join(' ');
+      }
+    }
+    get(`entries/${language}/${word}/synonyms`).then(
       (data) => {
         const lexicalEntries = data.results[0].lexicalEntries;
         if (lexicalEntries) {
@@ -195,10 +226,11 @@ commands.dictionary = {
             setTimeout(() => {
               const lexicalEntry = lexicalEntries[i];
               const text = parseSynonymEntries(lexicalEntry.entries);
+              console.log(text.length);
               if (text) {
                 let embed = new Discord.RichEmbed()
                 .setColor(0x00bdf2)
-                .setTitle(`Synonyms for: ${word} (${lexicalEntry.lexicalCategory.toLowerCase()})`)
+                .setTitle(`Synonyms for: ${plain_word} (${lexicalEntry.lexicalCategory.toLowerCase()})`)
                 .setDescription('```json\n' + text + '```')
                 .setFooter('Using the Oxford English Dictionary');
                 msg.channel.send(embed);
