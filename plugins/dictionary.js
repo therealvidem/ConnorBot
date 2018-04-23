@@ -161,6 +161,10 @@ commands.dictionary = {
       msg.channel.send(`Correct usage: ${client.prefix}dictionary define <word> [$language]`);
       return;
     }
+    if (word === 'life') {
+      msg.channel.send('Something you don\'t have');
+      return;
+    }
     let language = 'en';
     if (args.length > 1) {
       full_arg = args[args.length - 1];
