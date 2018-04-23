@@ -230,7 +230,6 @@ commands.dictionary = {
             setTimeout(() => {
               const lexicalEntry = lexicalEntries[i];
               const text = parseSynonymEntries(lexicalEntry.entries);
-              console.log(text.length);
               if (text) {
                 let embed = new Discord.RichEmbed()
                 .setColor(0x00bdf2)
