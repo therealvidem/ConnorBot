@@ -44,6 +44,7 @@ const fullLanguages = {
   'arabic': 'ar',
   'samoan': 'sm'
 }
+const fullLanguagesIndex = utils.invertObject(fullLanguages);
 const flagsIndex = utils.invertObject(languages);
 const usersCooldown = new Set();
 let points;
@@ -71,7 +72,8 @@ function getClownfishProfile(member, data) {
   let embed = utils.getBaseProfile(member);
   const embedData = {};
   Object.keys(data).forEach((language) => {
-    embedData[languages[language]] = data[language];
+    fullLanguage = fullLanguagesIndex[language];
+    embedData[languages[language] + ` ${fullLanguage.charAt(0).toUpperCase() + fullLanguage.slice(1)}`] = data[language];
   });
   embed = utils.getEmbedFromObject(embedData, false, embed);
   return embed;
