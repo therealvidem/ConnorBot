@@ -18,10 +18,10 @@
   "homepage": "https://github.com/therealvidem/CatalinaBot#readme",
   "dependencies": {
     "cleverbot": "^1.0.1",
-    "dateformat": "^3.0.2",
-    "discord.js": "^11.2.1",
-    "enmap": "^0.4.2",
-    "enmap-level": "^1.0.0",
+    "dateformat": "^3.0.3",
+    "discord.js": "^11.3.2",
+    "enmap": "^0.4.6",
+    "enmap-level": "^1.0.1",
     "google-translate-api": "^2.3.0",
     "node-gyp": "^3.6.2",
     "os-tmpdir": "^1.0.2"
