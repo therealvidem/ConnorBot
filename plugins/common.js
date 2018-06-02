@@ -171,11 +171,12 @@ commands.member = {
       });
     },
     'replace': function(msg, args) {
-      const rolesAndMember = getRolesAndMember(msg, args);
-      if (!rolesAndMember) {
+      if (args.length < 3) {
         msg.channel.send(`Correct usage: ${client.prefix}member role replace <member> <roletoreplace> <newrole>`);
         return;
-      };
+      }
+      const rolesAndMember = getRolesAndMember(msg, args);
+      if (!rolesAndMember) return;
       const role1 = rolesAndMember.roles[0];
       const role2 = rolesAndMember.roles[1];
       const member = rolesAndMember.member;
