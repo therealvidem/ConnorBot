@@ -18,7 +18,7 @@ const helpEmbed = new Discord.RichEmbed()
 
 commands.rate = {
   'someone': function(msg, args) {
-    const member = utils.convertToMember(msg.channel, args[0]);
+    const member = utils.convertToMember(msg.channel, args.join(' '));
     if (!member) {
       msg.channel.send(helpEmbed);
       return;
@@ -31,7 +31,7 @@ commands.rate = {
     msg.channel.send(`I give **${name}** ${article} **${rate}/10** ${emoji}`);
   },
   'thing': function(msg, args) {
-    const thing = args[0];
+    const thing = args.join(' ');
     if (!thing) {
       msg.channel.send(helpEmbed);
       return;
