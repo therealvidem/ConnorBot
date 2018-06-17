@@ -92,8 +92,8 @@ commands.rate = {
         return Math.floor(gen1 * 11) > Math.floor(gen2 * 11);
       });
       const embed = new Discord.RichEmbed().setColor(0x2F93E0);
-      for (let i = 0; i < randList.length; i++) {
-        embed.addField(i + 1, randList[i]);
+      for (let i = 0; i < list.length; i++) {
+        embed.addField(i + 1, list[i]);
       }
       msg.channel.send(embed);
     } else {
@@ -126,8 +126,8 @@ commands.rate = {
         return Math.floor(gen1 * 11) > Math.floor(gen2 * 11);
       });
       const embed = new Discord.RichEmbed().setColor(0x2F93E0);
-      for (let i = 0; i < randList.length; i++) {
-        embed.addField(i + 1, randList[i]);
+      for (let i = 0; i < list.length; i++) {
+        embed.addField(i + 1, list[i]);
       }
       msg.channel.send(embed);
     } else {
