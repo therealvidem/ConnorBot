@@ -127,48 +127,44 @@ function shutdownPlugin(pluginName) {
 module.exports.shutdownPlugin = shutdownPlugin; // For restarting
 
 // Simply removes the events and commands of the specified plugin, then sets it back up again.
-commands.load = {
-  'run': function(msg, args) {
-    const filename = `${args[0]}.js`;
-    const file = `./plugins/${filename}`;
-    const cachePlugin = plugins[filename];
-    if (!fs.existsSync(file)) {
-      if (cachePlugin) {
-        msg.channel.send(`Unloading plugin '${filename}' because it was deleted...`);
-        shutdownPlugin(filename);
-      } else {
-        msg.channel.send(`Plugin '${filename}' doesn't exist.`);
-      }
-      return;
+commands.load = function(msg, args) {
+  const filename = `${args[0]}.js`;
+  const file = `./plugins/${filename}`;
+  const cachePlugin = plugins[filename];
+  if (!fs.existsSync(file)) {
+    if (cachePlugin) {
+      msg.channel.send(`Unloading plugin '${filename}' because it was deleted...`);
+      shutdownPlugin(filename);
+    } else {
+      msg.channel.send(`Plugin '${filename}' doesn't exist.`);
     }
-    if (cachePlugin && cachePlugin.unload) {
-      cachePlugin.unload('reload');
-    }
-    shutdownPlugin(filename);
-    delete require.cache[require.resolve(file)];
-    const plugin = require(file);
-    msg.channel.send(`Loading plugin '${filename}'...`);
-    setupPlugin(plugin, filename);
-    msg.channel.send('Successfully loaded.');
+    return;
   }
+  if (cachePlugin && cachePlugin.unload) {
+    cachePlugin.unload('reload');
+  }
+  shutdownPlugin(filename);
+  delete require.cache[require.resolve(file)];
+  const plugin = require(file);
+  msg.channel.send(`Loading plugin '${filename}'...`);
+  setupPlugin(plugin, filename);
+  msg.channel.send('Successfully loaded.');
 };
 
-commands.unload = {
-  'run': function(msg, args) {
-    const filename = `${args[0]}.js`;
-    const file = `./plugins/${filename}`;
-    if (!fs.existsSync(file)) {
-      msg.channel.send(`Plugin '${filename}' doesn't exist.`);
-      return;
-    }
-    if (plugins[filename]) {
-      plugins[filename].unload('unload');
-    }
-    msg.channel.send(`Unloading plugin '${filename}'...`);
-    shutdownPlugin(filename);
-    msg.channel.send('Successfully unloaded.');
+commands.unload = function(msg, args) {
+  const filename = `${args[0]}.js`;
+  const file = `./plugins/${filename}`;
+  if (!fs.existsSync(file)) {
+    msg.channel.send(`Plugin '${filename}' doesn't exist.`);
+    return;
   }
-}
+  if (plugins[filename]) {
+    plugins[filename].unload('unload');
+  }
+  msg.channel.send(`Unloading plugin '${filename}'...`);
+  shutdownPlugin(filename);
+  msg.channel.send('Successfully unloaded.');
+};
 
 client.on('ready', () => {
   console.log(`Logged into ${client.guilds.size} guilds.`);
@@ -199,7 +195,6 @@ function getCommand(commandName, context, args) {
   if (typeof command === 'function') {
     return command;
   } else if (typeof command === 'object') {
-    if (!args) return;
     const subCommand = command[args[0]];
     if (subCommand) {
       return getCommand(args.shift(), command, args);

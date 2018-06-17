@@ -24,6 +24,7 @@
     "enmap-level": "^1.0.1",
     "google-translate-api": "^2.3.0",
     "node-gyp": "^3.6.2",
-    "os-tmpdir": "^1.0.2"
+    "os-tmpdir": "^1.0.2",
+    "seedrandom": "^2.4.3"
   }
 }
