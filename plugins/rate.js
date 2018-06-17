@@ -30,6 +30,18 @@ commands.rate = {
     const article = rate === 8 ? 'an' : 'a';
     msg.channel.send(`I give **${name}** ${article} **${rate}/10** ${emoji}`);
   },
+  'thing': function(msg, args) {
+    const thing = args[0];
+    if (!thing) {
+      msg.channel.send(helpEmbed);
+      return;
+    }
+    const gen = Rand(client.user.id + thing);
+    const rate = Math.floor(gen() * 11);
+    const emoji = rate >= 5 ? ':thumbsup:' : ':thumbsdown:';
+    const article = rate === 8 ? 'an' : 'a';
+    msg.channel.send(`I give **${thing}** ${article} **${rate}/10** ${emoji}`);
+  },
   'ship': function(msg, args) {
     if (args.length !== 2) {
       msg.channel.send(helpEmbed);
