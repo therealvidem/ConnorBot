@@ -87,9 +87,14 @@ commands.rate = {
         return;
       }
       const list = args.sort((x1, x2) => {
-        const gen1 = Rand(client.user.id + x1.toLowerCase());
-        const gen2 = Rand(client.user.id + x2.toLowerCase());
-        return Math.floor(gen1 * 11) > Math.floor(gen2 * 11);
+        const num1 = Math.floor(Rand(client.user.id + x1.toLowerCase())() * 11);
+        const num2 = Math.floor(Rand(client.user.id + x2.toLowerCase())() * 11);
+        if (num1 > num2) {
+          return -1;
+        } else if (num1 < num2) {
+          return 1;
+        }
+        return 0;
       });
       const embed = new Discord.RichEmbed().setColor(0x2F93E0);
       for (let i = 0; i < list.length; i++) {
@@ -121,9 +126,14 @@ commands.rate = {
         return p.user.id;
       });
       list.sort((person1, person2) => {
-        const gen1 = Rand(client.user.id + person1);
-        const gen2 = Rand(client.user.id + person2);
-        return Math.floor(gen1 * 11) > Math.floor(gen2 * 11);
+        const num1 = Math.floor(Rand(client.user.id + person1)() * 11);
+        const num2 = Math.floor(Rand(client.user.id + person2)() * 11);
+        if (num1 > num2) {
+          return 1;
+        } else if (num1 < num2) {
+          return -1;
+        }
+        return 0;
       });
       const embed = new Discord.RichEmbed().setColor(0x2F93E0);
       for (let i = 0; i < list.length; i++) {
