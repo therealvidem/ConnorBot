@@ -36,7 +36,7 @@ commands.rate = {
       msg.channel.send(helpEmbed);
       return;
     }
-    const gen = Rand(client.user.id + thing);
+    const gen = Rand(client.user.id + thing.toLowerCase());
     const rate = Math.floor(gen() * 11);
     const emoji = rate >= 5 ? ':thumbsup:' : ':thumbsdown:';
     const article = rate === 8 ? 'an' : 'a';
