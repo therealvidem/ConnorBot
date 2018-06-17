@@ -72,17 +72,20 @@ function parseDefEntries(entries) {
   let text = '';
   for (let i = 0; i < entries.length; i++) {
     let entry = entries[i];
-    for (let j = 0; j < entry.senses.length; j++) {
-      let sense = entry.senses[j];
-      let definitions = sense.definitions || sense.crossReferenceMarkers;
-      if (definitions) {
-        text += `${j + 1}) ${definitions[0]}\n`;
-        let subsenses = sense.subsenses;
-        if (subsenses) {
-          for (let k = 0; k < subsenses.length; k++) {
-            let subsense = subsenses[k];
-            let definitions = subsense.definitions || subsense.crossReferenceMarkers;
-            text += `  ${j + 1}.${k + 1}) ${definitions[0]}\n`;
+    let senses = entries.senses;
+    if (senses) {
+      for (let j = 0; j < senses.length; j++) {
+        let sense = senses[j];
+        let definitions = sense.definitions || sense.crossReferenceMarkers;
+        if (definitions) {
+          text += `${j + 1}) ${definitions[0]}\n`;
+          let subsenses = sense.subsenses;
+          if (subsenses) {
+            for (let k = 0; k < subsenses.length; k++) {
+              let subsense = subsenses[k];
+              let definitions = subsense.definitions || subsense.crossReferenceMarkers;
+              text += `  ${j + 1}.${k + 1}) ${definitions[0]}\n`;
+            }
           }
         }
       }
