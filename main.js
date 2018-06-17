@@ -43,21 +43,29 @@ function isOwner(author) {
   return author.id == client.ownerId;
 }
 
-function promptYesNo(msg, waitTime, content) {
+function promptYesNo(channel, target, waitTime, content) {
   return new Promise((resolve, reject) => {
-    msg.channel.send(content).then(() => {
-      msg.channel.awaitMessages(response => response.author === msg.author && (response.content.toLowerCase() === 'yes' || response.content.toLowerCase() === 'no'), {
+    channel.send(content).then(() => {
+      channel.awaitMessages(response => response.content, {
         max: 1,
         time: waitTime,
         errors: ['time']
       })
       .then((collected) => {
         const responseMsg = collected.first();
+        if (!responseMsg) {
+          reject();
+          return;
+        }
         const response = responseMsg.content.toLowerCase() === 'yes';
         resolve(response, responseMsg);
       })
       .catch((collected) => {
         const responseMsg = collected.first();
+        if (!responseMsg) {
+          reject();
+          return;
+        }
         const response = responseMsg.content.toLowerCase() === 'yes';
         resolve(response, responseMsg);
       });
@@ -233,3 +241,7 @@ if (config.token) {
 } else {
   console.error('Add a valid token to the "config.json"');
 }
+
+process.on('unhandledRejection', (reason, p) => {
+  console.log(p, reason);
+});

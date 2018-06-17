@@ -193,7 +193,7 @@ commands.clownfish = {
     }
   },
   'reset': function(msg, args) {
-    client.promptYesNo(msg, 10 * 1000, 'Are you sure you want to delete ALL of your clownfish data? (yes/no)')
+    client.promptYesNo(msg.channel, msg.author, 10 * 1000, 'Are you sure you want to delete ALL of your clownfish data? (yes/no)')
     .then(
       (response, responseMsg) => {
         if (response) {
