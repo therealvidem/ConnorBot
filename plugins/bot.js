@@ -22,6 +22,7 @@ function shutdownProcess(msg, args, reason) {
 module.exports.shutdownProcess = shutdownProcess;
 
 commands.shutdown = function(msg, args) {
+  if (!client.checkOwner(msg)) return;
   msg.channel.send('Shutting down...')
   .then(shutdownProcess(msg, args, 'shutdown'))
   .then(() => {
@@ -30,6 +31,7 @@ commands.shutdown = function(msg, args) {
 }
 
 commands.restart = function(msg, args) {
+  if (!client.checkOwner(msg)) return;
   msg.channel.send('Restarting...')
   .then(shutdownProcess(msg, args, 'restart'))
   .then(() => {
