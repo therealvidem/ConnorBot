@@ -72,7 +72,7 @@ function parseDefEntries(entries) {
   let text = '';
   for (let i = 0; i < entries.length; i++) {
     let entry = entries[i];
-    let senses = entries.senses;
+    let senses = entry.senses;
     if (senses) {
       for (let j = 0; j < senses.length; j++) {
         let sense = senses[j];
