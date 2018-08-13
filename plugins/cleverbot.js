@@ -37,15 +37,15 @@ events.message = function(msg) {
   let test_mention = Discord.MessageMentions.USERS_PATTERN.exec(content);
   Discord.MessageMentions.USERS_PATTERN.lastIndex = 0;
   let cleanContent = msg.cleanContent.trim().split(/ +/g).slice(1);
-  if (!cleanContent || !test_mention || test_mention.index !== 0 || content.charAt(test_mention.index + test_mention[0].length) !== ' ') return;
-  reply(cleanContent.join(' '), msg.channel, msg.author.id);
+  if (!test_mention || test_mention.index !== 0 || content.charAt(test_mention.index + test_mention[0].length) !== ' ') return;
+  reply(encodeURI(cleanContent.join(' ')), msg.channel, msg.author.id);
 }
 
 commands.cleverbot = function(msg, args) {
   if (!args[0]) return;
-  let content = msg.cleanContent;
-  content = content.slice(client.prefix.length + 10); // "c;cleverbot test" -> "test"
-  reply(content, msg.channel, msg.author.id);
+  let cleanContent = msg.cleanContent;
+  cleanContent = cleanContent.slice(client.prefix.length + 10); // "c;cleverbot test" -> "test"
+  reply(encodeURI(cleanContent.join(' ')), msg.channel, msg.author.id);
 }
 
 commands.resetcs = function(msg, args) {

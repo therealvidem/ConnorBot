@@ -6,7 +6,7 @@ const presenceFormat = {
   'idle': 'Idle',
   'dnd': 'Do Not Disturb'
 };
-const MENTIONS_PATTERN = new RegExp('<@!?([0-9]+)>$')
+const MENTIONS_PATTERN = new RegExp('<@!?([0-9]+)>$');
 
 function removeNonASCII(arg) {
   return arg.replace(/[^\x00-\x7F]/g, '').trim();

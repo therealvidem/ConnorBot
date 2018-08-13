@@ -23,9 +23,7 @@ module.exports.getPlugins = function() {
   return plugins;
 }
 
-module.exports.shutdownPlugin = function(pluginName) {
-  shutdownPlugin(pluginName);
-}
+module.exports.shutdownPlugin = shutdownPlugin;
 
 function isCommand(msg) {
   return !msg.author.bot && msg.content.indexOf(config.prefix) === 0;
