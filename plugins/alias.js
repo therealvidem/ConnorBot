@@ -33,7 +33,7 @@ commands.alias = {
     const alias = args[0];
     const commandName = args[1];
     if (!alias && !commandName) {
-      msg.channel.send(`You must do: ${client.prefix}alias add <alias> <commandToExecute>`);
+      msg.channel.send(`You must do: ${client.prefix}alias set <alias> <commandToExecute>`);
       return;
     }
     if (globalCommands[alias]) {
