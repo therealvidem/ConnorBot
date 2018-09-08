@@ -22,9 +22,13 @@
     "discord.js": "^11.3.2",
     "enmap": "^0.4.6",
     "enmap-level": "^1.0.1",
+    "ffmpeg-binaries": "^4.0.0",
     "google-translate-api": "^2.3.0",
     "node-gyp": "^3.6.2",
+    "opusscript": "0.0.6",
     "os-tmpdir": "^1.0.2",
-    "seedrandom": "^2.4.3"
+    "seedrandom": "^2.4.3",
+    "youtube-search": "^1.1.1",
+    "ytdl-core": "^0.25.2"
   }
 }
