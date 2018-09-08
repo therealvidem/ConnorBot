@@ -42,6 +42,11 @@ function play(msg, query) {
       const result = results[0];
       const stream = ytdl(result.link, {filter: 'audioonly'});
       dispatcher = connection.playStream(stream, {volume: currentVolume / 100});
+      dispatcher.on('end', (reason) => {
+        if (reason !== 'user') {
+          msg.member.voiceChannel.leave();
+        }
+      });
       currentlyPlaying = {
         'title': result.title,
         'link': result.link
