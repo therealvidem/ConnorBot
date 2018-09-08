@@ -11,7 +11,7 @@ const ytdl = require('ytdl-core');
 const search = require('youtube-search');
 const main = require('../main.js');
 const client = main.getClient();
-const cooldown = 1 * 60 * 1000;
+const cooldown = 20 * 1000;
 const usersCooldown = new Set();
 let currentVolume = 100;
 let dispatcher;
