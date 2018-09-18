@@ -58,8 +58,11 @@ function play(msg, query) {
         }
       });
       msg.channel.send(`Playing "${result.title}"`);
-    })
-  });
+    }).catch(err => {
+      msg.channel.send('Error joining vc');
+      console.log(err);
+    });
+  })
   .catch(console.log);
 }
 
