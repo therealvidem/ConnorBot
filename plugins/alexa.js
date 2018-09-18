@@ -62,8 +62,7 @@ function play(msg, query) {
       msg.channel.send('Error joining vc');
       console.log(err);
     });
-  })
-  .catch(console.log);
+  });
 }
 
 events.message = function(msg) {
