@@ -30,6 +30,11 @@ function getVolume(msg) {
 }
 
 function play(msg, query) {
+  const options = {
+    'maxResults': 1,
+    'key': googleKey,
+    'type': 'video'
+  };
   search(query, options, (err, results) => {
     if (err || results.length < 1) {
       msg.channel.send(`I cannot find ${query}`);
@@ -40,11 +45,6 @@ function play(msg, query) {
     const volume = volumes[msg.guild.id] || 100;
     volumes[msg.guild.id] = volume;
     msg.member.voiceChannel.join().then(connection => {
-      const options = {
-        'maxResults': 1,
-        'key': googleKey,
-        'type': 'video'
-      };
       guilds[msg.guild.id] = {
         'dispatcher': connection.playStream(stream, {'volume': volume / 100}),
         'currentlyPlaying': {
