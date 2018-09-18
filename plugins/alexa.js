@@ -13,9 +13,11 @@ const main = require('../main.js');
 const client = main.getClient();
 const cooldown = 20 * 1000;
 const usersCooldown = new Set();
-let currentVolume = 100;
-let dispatcher;
-let currentlyPlaying;
+const guilds = {};
+const volumes = {};
+// let currentVolume = 100;
+// let dispatcher;
+// let currentlyPlaying;
 
 function getVolume(msg) {
   const args = msg.content.split(/ +/g);
@@ -33,7 +35,7 @@ function play(msg, query) {
       'maxResults': 1,
       'key': googleKey,
       'type': 'video'
-    }
+    };
     search(query, options, (err, results) => {
       if (err || results.length < 1) {
         msg.channel.send(`I cannot find ${query}`);
@@ -41,16 +43,20 @@ function play(msg, query) {
       }
       const result = results[0];
       const stream = ytdl(result.link, {filter: 'audioonly'});
-      dispatcher = connection.playStream(stream, {volume: currentVolume / 100});
-      dispatcher.on('end', (reason) => {
+      const volume = volumes[msg.guild.id] || 100;
+      guilds[msg.guild.id] = {
+        'dispatcher': connection.playStream(stream, {'volume': volume / 100}),
+        'currentlyPlaying': {
+          'title': result.title,
+          'link': result.link
+        }
+      }
+      volumes[msg.guild.id] = volume;
+      guilds[msg.guild.id].dispatcher.on('end', (reason) => {
         if (reason !== 'user') {
           msg.member.voiceChannel.leave();
         }
       });
-      currentlyPlaying = {
-        'title': result.title,
-        'link': result.link
-      }
       msg.channel.send(`Playing "${result.title}"`);
     });
   })
@@ -59,7 +65,7 @@ function play(msg, query) {
 
 events.message = function(msg) {
   if (!msg.guild) return;
-
+  const guild = guilds[msg.guild.id];
   const content = msg.content.toLowerCase();
   if (content.startsWith('alexa, play') || content.startsWith('connor, play')) {
     if (msg.member.voiceChannel) {
@@ -76,8 +82,8 @@ events.message = function(msg) {
       setTimeout(() => {
         usersCooldown.delete(msg.author);
       }, cooldown);
-      if (dispatcher && !dispatcher.destroyed) {
-        dispatcher.end();
+      if (guild && guild.dispatcher && !guild.dispatcher.destroyed) {
+        guild.dispatcher.end();
         setTimeout(() => {
           play(msg, query);
         }, 1 * 1000);
@@ -86,32 +92,31 @@ events.message = function(msg) {
       }
     }
   } else if (content.startsWith('alexa, volume') || content.startsWith('connor, volume')) {
-    if (msg.member.voiceChannel && dispatcher) {
+    if (msg.member.voiceChannel && guild && guild.dispatcher) {
       const volume = getVolume(msg);
       if (!volume) return;
-      currentVolume = volume;
-      dispatcher.setVolume(volume / 100);
-      msg.channel.send(`Volume is now ${currentVolume}`);
+      volumes[msg.guild.id] = volume;
+      guild.dispatcher.setVolume(volume / 100);
+      msg.channel.send(`Volume is now ${volume}`);
     } else {
       const volume = getVolume(msg);
       if (!volume) return;
-      currentVolume = volume;
-      msg.channel.send(`Volume is now ${currentVolume}`);
+      volumes[msg.guild.id] = volume;
+      msg.channel.send(`Volume is now ${volume}`);
     }
   } else if (content.startsWith('alexa, stop') || content.startsWith('connor, stop')) {
-    if (msg.member.voiceChannel && dispatcher) {
-      if (!dispatcher.destroyed) {
-        dispatcher.end();
+    if (msg.member.voiceChannel && guild && guild.dispatcher) {
+      if (!guild.dispatcher.destroyed) {
+        guild.dispatcher.end();
       }
-      dispatcher = undefined;
-      currentlyPlaying = undefined;
+      delete guilds[msg.guild.id];
       msg.member.voiceChannel.leave();
     }
   } else if (content.startsWith('alexa, what\'s playing') || content.startsWith('connor, what\'s playing')) {
-    if (!currentlyPlaying) {
-      msg.channel.send('Nothing is currently playing');
+    if (guild && guild.currentlyPlaying) {
+      msg.channel.send(`Currently playing: "${guild.currentlyPlaying['title']}"\n${guild.currentlyPlaying['link']}`);
     } else {
-      msg.channel.send(`Currently playing: "${currentlyPlaying['title']}"\n${currentlyPlaying['link']}`);
+      msg.channel.send('Nothing is currently playing');
     }
   }
 }
