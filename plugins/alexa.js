@@ -30,20 +30,21 @@ function getVolume(msg) {
 }
 
 function play(msg, query) {
-  msg.member.voiceChannel.join().then(connection => {
-    const options = {
-      'maxResults': 1,
-      'key': googleKey,
-      'type': 'video'
-    };
-    search(query, options, (err, results) => {
-      if (err || results.length < 1) {
-        msg.channel.send(`I cannot find ${query}`);
-        return;
-      }
-      const result = results[0];
-      const stream = ytdl(result.link, {filter: 'audioonly'});
-      const volume = volumes[msg.guild.id] || 100;
+  search(query, options, (err, results) => {
+    if (err || results.length < 1) {
+      msg.channel.send(`I cannot find ${query}`);
+      return;
+    }
+    const result = results[0];
+    const stream = ytdl(result.link, {filter: 'audioonly'});
+    const volume = volumes[msg.guild.id] || 100;
+    volumes[msg.guild.id] = volume;
+    msg.member.voiceChannel.join().then(connection => {
+      const options = {
+        'maxResults': 1,
+        'key': googleKey,
+        'type': 'video'
+      };
       guilds[msg.guild.id] = {
         'dispatcher': connection.playStream(stream, {'volume': volume / 100}),
         'currentlyPlaying': {
@@ -51,15 +52,14 @@ function play(msg, query) {
           'link': result.link
         }
       }
-      volumes[msg.guild.id] = volume;
       guilds[msg.guild.id].dispatcher.on('end', (reason) => {
         if (reason !== 'user') {
           msg.member.voiceChannel.leave();
         }
       });
       msg.channel.send(`Playing "${result.title}"`);
-    });
-  })
+    })
+  });
   .catch(console.log);
 }
 
