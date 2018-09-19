@@ -9,7 +9,6 @@ const events = {};
 const commands = {};
 
 function init(user, key, nick) {
-  console.log(user, key, nick);
   request.post({
     url: cleverbotUrl + 'create',
     form: {
@@ -29,11 +28,11 @@ function init(user, key, nick) {
   });
 }
 
-function reply(msg, channel, userId) {
+function reply(msg, channel, id) {
   const user = client.cleverBot.get('user');
   const key = client.cleverBot.get('key');
-  if (!userStates[userId]) {
-    init(user, key, userId);
+  if (!userStates[id]) {
+    init(user, key, id);
   }
   channel.startTyping();
   request.post({
@@ -41,7 +40,7 @@ function reply(msg, channel, userId) {
     form: {
       'user': user,
       'key': key,
-      'nick': userId,
+      'nick': id,
       'text': msg
     }
   }, (err, httpResponse, body) => {
@@ -55,7 +54,7 @@ function reply(msg, channel, userId) {
     if (jsonBody.status === 'success') {
       channel.send(jsonBody.response);
       channel.stopTyping();
-      userStates[userId] = true;
+      userStates[id] = true;
     } else {
       channel.send('An error occured');
       console.log(jsonBody.status);
@@ -76,14 +75,14 @@ events.message = function(msg) {
   Discord.MessageMentions.USERS_PATTERN.lastIndex = 0;
   let cleanContent = msg.cleanContent.trim().split(/ +/g).slice(1);
   if (!test_mention || test_mention.index !== 0 || content.charAt(test_mention.index + test_mention[0].length) !== ' ') return;
-  reply(encodeURI(cleanContent.join(' ')), msg.channel, msg.author.id);
+  reply(encodeURI(cleanContent.join(' ')), msg.channel, client.user.id + msg.author.id);
 }
 
 commands.cleverbot = function(msg, args) {
   if (!args[0]) return;
   let cleanContent = msg.cleanContent;
   cleanContent = cleanContent.slice(client.prefix.length + 10); // "c;cleverbot test" -> "test"
-  reply(encodeURI(cleanContent.join(' ')), msg.channel, msg.author.id);
+  reply(encodeURI(cleanContent.join(' ')), msg.channel, client.user.id + msg.author.id);
 }
 
 commands.setcleverbot = function(msg, args) {
