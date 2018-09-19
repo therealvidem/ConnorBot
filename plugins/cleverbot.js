@@ -1,29 +1,67 @@
 const querystring = require('querystring');
-const Cleverbot = require('cleverbot');
+const request = require('request');
+const cleverbotUrl = 'https://cleverbot.io/1.0/';
 const Enmap = require('enmap');
-const EnmapLevel = require('enmap-level');
-const provider = new EnmapLevel({name: 'cleverBot'});
 const Discord = require('discord.js')
 const client = require('../main.js').getClient();
+const userStates = {};
 const events = {};
 const commands = {};
-const userStates = {};
-let cleverBot;
+
+function init(user, key, nick) {
+  console.log(user, key, nick);
+  request.post({
+    url: cleverbotUrl + 'create',
+    form: {
+      'user': user,
+      'key': key,
+      'nick': nick
+    }
+  }, (err, httpResponse, body) => {
+    if (err) {
+      console.log(err);
+      return;
+    }
+    const jsonBody = JSON.parse(body);
+    if (!jsonBody.status === 'success') {
+      console.log(jsonBody.status);
+    }
+  });
+}
 
 function reply(msg, channel, userId) {
+  const user = client.cleverBot.get('user');
+  const key = client.cleverBot.get('key');
+  if (!userStates[userId]) {
+    init(user, key, userId);
+  }
   channel.startTyping();
-  cleverbot.query(msg, {
-    'cs': userStates[userId] || ''
-  })
-  .then((response) => {
-    userStates[userId] = response.cs;
-    channel.send(response.output);
-    channel.stopTyping();
-  })
-  .catch((error) => {
-    console.log(error.stack);
-    channel.send(error.message);
-    channel.stopTyping();
+  request.post({
+    url: cleverbotUrl + 'ask',
+    form: {
+      'user': user,
+      'key': key,
+      'nick': userId,
+      'text': msg
+    }
+  }, (err, httpResponse, body) => {
+    if (err) {
+      channel.send('An error occured');
+      console.log(err);
+      channel.stopTyping();
+      return;
+    }
+    const jsonBody = JSON.parse(body);
+    if (jsonBody.status === 'success') {
+      channel.send(jsonBody.response);
+      channel.stopTyping();
+      userStates[userId] = true;
+    } else {
+      channel.send('An error occured');
+      console.log(jsonBody.status);
+      channel.stopTyping();
+      return;
+    }
   });
 }
 
@@ -48,38 +86,24 @@ commands.cleverbot = function(msg, args) {
   reply(encodeURI(cleanContent.join(' ')), msg.channel, msg.author.id);
 }
 
-commands.resetcs = function(msg, args) {
-  if (userStates[msg.author.id]) {
-    delete userStates[msg.author.id];
-  }
-  msg.channel.send('Successfully cleared our conversation');
-}
-
 commands.setcleverbot = function(msg, args) {
-  let key = args[0];
-  if (!key || !client.checkOwner(msg)) return;
+  let user = args[0];
+  let key = args[1];
+  if (!key || !user || !client.checkOwner(msg)) return;
   if (msg.channel.type != 'dm') {
     msg.channel.send('You can only use that command in DMs');
     return;
   }
+  client.cleverBot.set('user', user);
   client.cleverBot.set('key', key);
-  msg.channel.send(`Successfully set key to ${key}`);
+  msg.channel.send(`Successfully set user and key`);
 }
 
 module.exports.events = events;
 module.exports.commands = commands;
 module.exports.setup = function() {
-  client.cleverBot = new Enmap({provider: provider});
+  client.cleverBot = new Enmap({ name: 'cleverBot' });
   client.cleverBot.defer.then(() => {
-    cleverbot = new Cleverbot({
-      'key': client.cleverBot.get('key')
-    });
-    console.log('Loaded Cleverbot data.');
-  });
-}
-module.exports.unload = function(reason) {
-  return new Promise((resolve, reject) => {
-    provider.close();
-    resolve();
+    console.log('Loaded Cleverbot data');
   });
 }

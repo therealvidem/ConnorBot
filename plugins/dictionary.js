@@ -3,8 +3,6 @@ const https = require('https');
 const Discord = require('discord.js');
 const querystring = require('querystring');
 const Enmap = require('enmap');
-const EnmapLevel = require('enmap-level');
-const provider = new EnmapLevel({name: 'dictionary'});
 const client = require('../main.js').getClient();
 const utils = require('../utils.js');
 const validLanguages = {
@@ -256,14 +254,8 @@ commands.dictionary = {
 
 module.exports.commands = commands;
 module.exports.setup = function() {
-  client.dictionary = new Enmap({provider: provider});
+  client.dictionary = new Enmap({name: 'dictionary'});
   client.dictionary.defer.then(() => {
     console.log('Loaded dictionary data.');
-  });
-}
-module.exports.unload = function(reason) {
-  return new Promise((resolve, reject) => {
-    provider.close();
-    resolve();
   });
 }

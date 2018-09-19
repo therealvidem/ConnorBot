@@ -1,6 +1,4 @@
 const Enmap = require('enmap');
-const EnmapLevel = require('enmap-level');
-const provider = new EnmapLevel({name: 'loggingChannels'});
 const fs = require('fs');
 const events = {};
 const commands = {};
@@ -76,7 +74,7 @@ commands.channellogger = function(msg, args) {
 module.exports.events = events;
 module.exports.commands = commands;
 module.exports.setup = function() {
-  client.loggingChannels = new Enmap({provider: provider});
+  client.loggingChannels = new Enmap({ name: 'loggingChannels' });
   client.loggingChannels.defer.then(() => {
     console.log('Loaded loggingChannels data.');
   });
@@ -101,7 +99,5 @@ module.exports.unload = function(reason) {
         });
       });
     }
-    provider.close();
-    resolve();
   });
 }

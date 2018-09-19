@@ -1,8 +1,6 @@
 const Discord = require('discord.js');
 const translate = require('google-translate-api');
 const Enmap = require('enmap');
-const EnmapLevel = require('enmap-level');
-const provider = new EnmapLevel({name: 'clownfish'});
 const events = {};
 const commands = {};
 const utils = require('../utils.js');
@@ -262,15 +260,9 @@ commands.clownfish = {
 module.exports.commands = commands;
 module.exports.events = events;
 module.exports.setup = function() {
-  client.clownfish = new Enmap({provider: provider});
+  client.clownfish = new Enmap({name: 'clownfish'});
   client.clownfish.defer.then(() => {
     points = client.clownfish.get('points') || {};
     console.log('Loaded clownfish data.');
-  });
-}
-module.exports.unload = function(reason) {
-  return new Promise((resolve, reject) => {
-    provider.close();
-    resolve();
   });
 }

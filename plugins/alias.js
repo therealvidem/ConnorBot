@@ -1,6 +1,4 @@
 const Enmap = require('enmap');
-const EnmapLevel = require('enmap-level');
-const provider = new EnmapLevel({name: 'aliases'});
 const main = require('../main.js');
 const utils = require('../utils.js');
 const client = main.getClient();
@@ -85,15 +83,9 @@ commands.alias = {
 module.exports.events = events;
 module.exports.commands = commands;
 module.exports.setup = function() {
-  client.aliases = new Enmap({provider: provider});
+  client.aliases = new Enmap({name: 'aliases'});
   client.aliases.defer.then(() => {
     aliases = client.aliases.get('aliases') || {};
     console.log('Loaded aliases data.');
-  });
-}
-module.exports.unload = function(reason) {
-  return new Promise((resolve, reject) => {
-    provider.close();
-    resolve();
   });
 }
