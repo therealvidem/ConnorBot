@@ -132,10 +132,10 @@ commands.member = {
     let id = user.id.toString();
     const start = parseInt(args[0]);
     const end = parseInt(args[1]);
-    if (start && (start > id.length || -start < id.length)) {
+    if (start && (start > id.length)) {
       msg.channel.send('That start index is too big!');
       return;
-    } else if (end && (end > id.length || -end < id.length)) {
+    } else if (end && (end > id.length)) {
       msg.channel.send('That end index is too big!');
       return;
     }
