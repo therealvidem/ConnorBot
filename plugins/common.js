@@ -127,8 +127,8 @@ commands.member = {
     sendProperty(msg, user, 'id', user.tag);
   },
   'id_start_end': function(msg, args) {
-    const member = msg.author;
-    const user = member.user;
+    const user = msg.author;
+    if (!user) return;
     let id = user.id.toString();
     const start = parseInt(args[0]);
     const end = parseInt(args[1]);
