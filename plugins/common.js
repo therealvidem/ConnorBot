@@ -126,50 +126,6 @@ commands.member = {
     const user = member.user;
     sendProperty(msg, user, 'id', user.tag);
   },
-  'id_start_end': function(msg, args) {
-    const user = msg.author;
-    if (!user) return;
-    let id = user.id.toString();
-    const start = parseInt(args[0]);
-    const end = parseInt(args[1]);
-    if (start && (start > id.length)) {
-      msg.channel.send('That start index is too big!');
-      return;
-    } else if (end && (end > id.length)) {
-      msg.channel.send('That end index is too big!');
-      return;
-    }
-    if (start && end) {
-      id = id[start] + id[end];
-    } else if (start) {
-      id = id[start];
-    }
-    msg.channel.send(id);
-  },
-  'id_start_end_multiple': function(msg, args) {
-    const embedData = {};
-    channel.guild.members.array.forEach(member => {
-      const user = member.user;
-      if (user) {
-        let id = user.id.toString();
-        const start = parseInt(args[0]);
-        const end = parseInt(args[1]);
-        if (start && (start > id.length || -start < id.length)) {
-          msg.channel.send('That start index is too big!');
-          return;
-        } else if (end && (end > id.length || -end < id.length)) {
-          msg.channel.send('That end index is too big!');
-          return;
-        }
-        if (start && end) {
-          id = id[start] + id[end];
-        } else if (start) {
-          id = id[start];
-        }
-        embedData[user.tag] = id;
-      }
-    });
-  },
   'username': function(msg, args) {
     const member = getMember(msg, args);
     if (!member) return;
