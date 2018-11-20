@@ -124,7 +124,24 @@ commands.member = {
     const member = getMember(msg, args);
     if (!member) return;
     const user = member.user;
-    sendProperty(msg, user, 'id', user.tag);
+    let id = user.id.toString();
+    const start = parseInt(args[1]);
+    const end = parseInt(args[2]);
+    if (start && (start > id.length || -start < id.length)) {
+      msg.channel.send('That start index is too big!');
+      return;
+    } else if (end && (end > id.length || -end < id.length)) {
+      msg.channel.send('That end index is too big!');
+      return;
+    }
+    if (start && end) {
+      id = id[start] + id[end];
+    } else if (start) {
+      id = id[start];
+    }
+    //const user = member.user;
+    //sendProperty(msg, user, 'id', user.tag);
+    msg.channel.send(id);
   },
   'username': function(msg, args) {
     const member = getMember(msg, args);
