@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
-const translate = require('google-translate-api');
-const Enmap = require('enmap');
+const translate = require('@vitalets/google-translate-api');
+const Keyv = require('keyv');
 const events = {};
 const commands = {};
 const utils = require('../utils.js');
@@ -52,7 +52,7 @@ function randomFromList(list) {
   return items[Math.floor(Math.random() * items.length)];
 }
 
-function incrementPoints(id, language) {
+async function incrementPoints(id, language) {
   let userPoints = points[id];
   if (!userPoints) {
     points[id] = {};
@@ -63,7 +63,7 @@ function incrementPoints(id, language) {
     userPoints[language] = 0;
   }
   userPoints[language]++;
-  client.clownfish.set('points', points);
+  await client.clownfish.set('points', points);
 }
 
 function getClownfishProfile(member, data) {
@@ -105,7 +105,7 @@ events.message = function(msg) {
   const language = randomFromList(Object.keys(languages));
   const flag = languages[language];
   const id = msg.author.id;
-  if ((!debug && num === chance) || (debug && id === client.ownerId)) {
+  if (((!debug && num === chance) || (debug && id === client.ownerId))) {
     translate(msg.content, {from: 'en', to: language})
     .then(res => {
       incrementPoints(id, language);
@@ -193,10 +193,10 @@ commands.clownfish = {
   'reset': function(msg, args) {
     client.promptYesNo(msg.channel, msg.author, 10 * 1000, 'Are you sure you want to delete ALL of your clownfish data? (yes/no)')
     .then(
-      (response, responseMsg) => {
+      async (response, responseMsg) => {
         if (response) {
           delete points[msg.author.id];
-          client.clownfish.set('points', points);
+          await client.clownfish.set('points', points);
           msg.channel.send('Successfully deleted your clownfish data');
         } else {
           msg.channel.send('Okay, I won\'t delete your clownfish data');
@@ -260,9 +260,7 @@ commands.clownfish = {
 module.exports.commands = commands;
 module.exports.events = events;
 module.exports.setup = function() {
-  client.clownfish = new Enmap({name: 'clownfish'});
-  client.clownfish.defer.then(() => {
-    points = client.clownfish.get('points') || {};
-    console.log('Loaded clownfish data.');
-  });
+  client.clownfish = new Keyv(null, {namespace: 'clownfish'});
+  points = client.clownfish.get('points') || {};
+  client.clownfish.on('error', err => console.log('Clownfish Plugin Connection Error', err));
 }

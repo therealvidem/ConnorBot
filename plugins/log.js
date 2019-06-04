@@ -1,10 +1,11 @@
-const Enmap = require('enmap');
+const Keyv = require('keyv');
 const fs = require('fs');
 const events = {};
 const commands = {};
 const dir = './data/channellogger';
 const client = require('../main.js').getClient();
 let shuttingDown = false; // We need this because sometimes the bot logs "<prefix>;shutdown"
+let loggingChannelIds = {};
 
 function makeDir(guildDir, channelFile) {
   if (!fs.existsSync(dir)) {
@@ -15,12 +16,13 @@ function makeDir(guildDir, channelFile) {
   }
 }
 
-function log(msg) {
+async function log(msg) {
   if (!msg.guild || shuttingDown) return;
   const guildId = msg.guild.id;
   const channel = msg.channel;
   const channelId = channel.id;
-  if (!client.loggingChannels.get(channelId)) return;
+  const logChannel = await client.loggingChannels.get(channelId);
+  if (!logChannel) return;
   const author = msg.author;
   const attachments = msg.attachments;
   const content = String.raw`${msg.cleanContent}`;
@@ -57,20 +59,22 @@ events.messageUpdate = function(oldmsg, newmsg) {
   newmsg.content = newmsgContentHolder;
 }
 
-commands.channellogger = function(msg, args) {
+commands.channellogger = async function(msg, args) {
   if (!client.checkOwner(msg)) return;
   if (args[0] === 'all') {
     for (const channel in client.channels) {
-      client.loggingChannels.set(channel.id, true);
+      loggingChannelIds[channel.id] = true;
+      await client.loggingChannels.set(channel.id, true);
     }
     msg.channel.send('Enabled logging for all channels in this guild');
   } else {
     const channel = msg.channel;
-    let logging = client.loggingChannels.get(channel.id);
+    let logging = await client.loggingChannels.get(channel.id);
     if (logging === undefined) {
       logging = false;
     }
-    client.loggingChannels.set(channel.id, !logging);
+    loggingChannelIds[channel.id] = true;
+    await client.loggingChannels.set(channel.id, !logging);
     const abled = !logging
     ? 'Enabled'
     : 'Disabled';
@@ -81,29 +85,38 @@ commands.channellogger = function(msg, args) {
 module.exports.events = events;
 module.exports.commands = commands;
 module.exports.setup = function() {
-  client.loggingChannels = new Enmap({ name: 'loggingChannels' });
-  client.loggingChannels.defer.then(() => {
-    console.log('Loaded loggingChannels data.');
+  client.loggingChannels = new Keyv(null, {namespace: 'loggingChannels' });
+  client.channels.tap(async (channel) => {
+    const logChannel = await client.loggingChannels.get(channel.id);
+    if (logChannel) {
+      loggingChannelIds[channel.id] = true;
+    }
   });
+  client.loggingChannels.on('error', err => console.log('Log Plugin Connection Error', err));
 }
 module.exports.unload = function(reason) {
   return new Promise((resolve, reject) => {
     if (reason === 'shutdown') {
       shuttingDown = true;
-      const loggingChannels = client.channels.filter((channel) => {
-        return channel.type === 'text' && client.loggingChannels.get(channel.id);
-      });
-      loggingChannels.forEach((channel) => {
-        const guildDir = `${dir}/${channel.guild.id}`;
-        const channelFile = `${guildDir}/${channel.id}.log`;
-        const date = new Date();
-        let log = `*** BOT SHUTDOWN AT ${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} `;
-        log += `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}.${date.getMilliseconds()} ***\n\n`;
-        fs.appendFile(channelFile, log, function (err) {
-          if (err) {
-            console.log(err);
-          }
-        });
+      client.channels.tap((channel) => {
+        if (loggingChannelIds[channel.id]) {
+          const guildDir = `${dir}/${channel.guild.id}`;
+          const channelFile = `${guildDir}/${channel.id}.log`;
+          const date = new Date();
+          let log = `*** BOT SHUTDOWN AT ${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} `;
+          log += `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}.${date.getMilliseconds()} ***\n\n`;
+          fs.access(channelFile, fs.F_OK, (err) => {
+            if (err) {
+              console.log(err);
+              return;
+            }
+            fs.appendFile(channelFile, log, function (err) {
+              if (err) {
+                console.log(err);
+              }
+            });
+          })
+        }
       });
     }
   });

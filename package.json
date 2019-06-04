@@ -1,35 +1,28 @@
 {
-  "name": "catalinabot",
+  "name": "connorbot",
   "version": "1.0.0",
-  "description": "",
+  "description": "An experimental bot made with discord.js.",
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/therealvidem/CatalinaBot.git"
+    "url": "git+https://github.com/therealvidem/ConnorBot.git"
   },
-  "author": "",
+  "author": "videm",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/therealvidem/CatalinaBot/issues"
+    "url": "https://github.com/therealvidem/ConnorBot/issues"
   },
-  "homepage": "https://github.com/therealvidem/CatalinaBot#readme",
+  "homepage": "https://github.com/therealvidem/ConnorBot#readme",
   "dependencies": {
-    "better-sqlite-pool": "^0.1.2",
-    "cleverbot": "^1.0.1",
+    "@vitalets/google-translate-api": "^2.8.0",
     "dateformat": "^3.0.3",
-    "discord.js": "^11.4.2",
-    "enmap": "^4.2.4",
-    "enmap-level": "^1.0.1",
-    "ffmpeg-binaries": "^4.0.0",
-    "google-translate-api": "^2.3.0",
-    "node-gyp": "^3.8.0",
-    "opusscript": "0.0.6",
-    "os-tmpdir": "^1.0.2",
-    "seedrandom": "^2.4.4",
-    "youtube-search": "^1.1.1",
-    "ytdl-core": "^0.25.2"
+    "discord.js": "^11.5.1",
+    "keyv": "^3.1.0",
+    "seedrandom": "^3.0.1",
+    "youtube-search": "^1.1.4",
+    "ytdl-core": "^0.29.2"
   }
 }

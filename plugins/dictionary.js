@@ -1,10 +1,8 @@
 const commands = {};
 const https = require('https');
 const Discord = require('discord.js');
-const querystring = require('querystring');
-const Enmap = require('enmap');
+const Keyv = require('keyv');
 const client = require('../main.js').getClient();
-const utils = require('../utils.js');
 const validLanguages = {
   'en': 'English',
   'es': 'Spanish'
@@ -93,7 +91,9 @@ function parseDefEntries(entries) {
   return text;
 }
 
-function get(path) {
+async function get(path) {
+  const appId = await client.dictionary.get('id');
+  const appKey = await client.dictionary.get('key');
   const options = {
     hostname: 'od-api.oxforddictionaries.com',
     port: 443,
@@ -101,8 +101,8 @@ function get(path) {
     method: 'GET',
     headers: {
       'Accept': 'application/json',
-      'app_id': client.dictionary.get('id') || '',
-      'app_key': client.dictionary.get('key') || ''
+      'app_id': appId || '',
+      'app_key': appKey || ''
     }
   };
   return new Promise(function(resolve, err) {
@@ -131,7 +131,7 @@ function get(path) {
 }
 
 commands.dictionary = {
-  'setidandkey': function(msg, args) {
+  'setidandkey': async function(msg, args) {
     const id = args[0];
     const key = args[1];
     if (!key || !id || !client.checkOwner(msg)) return;
@@ -139,8 +139,8 @@ commands.dictionary = {
       msg.channel.send('You can only use that command in DMs');
       return;
     }
-    client.dictionary.set('id', id);
-    client.dictionary.set('key', key);
+    await client.dictionary.set('id', id);
+    await client.dictionary.set('key', key);
     msg.channel.send(`Successfully set id to ${id} and key to ${key}`);
   },
   'languages': function(msg, args) {
@@ -254,8 +254,6 @@ commands.dictionary = {
 
 module.exports.commands = commands;
 module.exports.setup = function() {
-  client.dictionary = new Enmap({name: 'dictionary'});
-  client.dictionary.defer.then(() => {
-    console.log('Loaded dictionary data.');
-  });
+  client.dictionary = new Keyv(null, {namespace: 'dictionary'});
+  client.dictionary.on('error', err => console.log('Dictionary Plugin Connection Error', err));
 }

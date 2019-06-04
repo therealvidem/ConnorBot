@@ -1,4 +1,4 @@
-const Enmap = require('enmap');
+const Keyv = require('keyv');
 const main = require('../main.js');
 const utils = require('../utils.js');
 const client = main.getClient();
@@ -27,7 +27,7 @@ events.message = function(msg) {
 }
 
 commands.alias = {
-  'set': function(msg, args) {
+  'set': async function(msg, args) {
     const alias = args[0];
     const commandName = args[1];
     if (!alias && !commandName) {
@@ -52,10 +52,10 @@ commands.alias = {
       'commandName': commandName,
       'args': args.slice(2)
     };
-    client.aliases.set('aliases', aliases);
+    await client.aliases.set('aliases', aliases);
     msg.channel.send('Successfully created an alias for that specific command');
   },
-  'remove': function(msg, args) {
+  'remove': async function(msg, args) {
     const alias = args[0];
     if (!alias) {
       msg.channel.send(`You must do: ${client.prefix}alias remove <alias>`);
@@ -66,7 +66,7 @@ commands.alias = {
       return;
     }
     delete aliases[alias];
-    client.aliases.set('aliases', aliases);
+    await client.aliases.set('aliases', aliases);
     msg.channel.send('Successfully removed that alias');
   },
   'list': function(msg, args) {
@@ -82,10 +82,8 @@ commands.alias = {
 
 module.exports.events = events;
 module.exports.commands = commands;
-module.exports.setup = function() {
-  client.aliases = new Enmap({name: 'aliases'});
-  client.aliases.defer.then(() => {
-    aliases = client.aliases.get('aliases') || {};
-    console.log('Loaded aliases data.');
-  });
+module.exports.setup = async function() {
+  client.aliases = new Keyv(null, {namespace: 'aliases'});
+  aliases = await client.aliases.get('aliases') || {};
+  client.aliases.on('error', err => console.log('Aliases Plugin Connection Error', err));
 }
