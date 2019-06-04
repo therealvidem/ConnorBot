@@ -59,16 +59,23 @@ events.messageUpdate = function(oldmsg, newmsg) {
 
 commands.channellogger = function(msg, args) {
   if (!client.checkOwner(msg)) return;
-  const channel = msg.channel;
-  let logging = client.loggingChannels.get(channel.id);
-  if (logging === undefined) {
-    logging = false;
+  if (args[0] === 'all') {
+    for (const channel in client.channels) {
+      client.loggingChannels.set(channel.id, true);
+    }
+    msg.channel.send('Enabled logging for all channels in this guild');
+  } else {
+    const channel = msg.channel;
+    let logging = client.loggingChannels.get(channel.id);
+    if (logging === undefined) {
+      logging = false;
+    }
+    client.loggingChannels.set(channel.id, !logging);
+    const abled = !logging
+    ? 'Enabled'
+    : 'Disabled';
+    channel.send(`${abled} logging for this channel.`);
   }
-  client.loggingChannels.set(channel.id, !logging);
-  const abled = !logging
-                ? 'Enabled'
-                : 'Disabled';
-  channel.send(`${abled} logging for this channel.`);
 }
 
 module.exports.events = events;
