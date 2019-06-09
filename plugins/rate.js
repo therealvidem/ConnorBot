@@ -11,6 +11,7 @@ message += '`' + client.prefix + 'rate regularship [person] [person]`\n';
 message += '`' + client.prefix + 'rate thing [thingy]`\n';
 message += '`' + client.prefix + 'rate list [thingies]`\n';
 message += '`' + client.prefix + 'rate people [people]`\n';
+message += '`' + client.prefix + 'rate spotify [member]`\n';
 const helpEmbed = new Discord.RichEmbed()
                   .setColor('DARK_BLUE')
                   .setTitle('**Videm\'s Robust Rating System 9000**')
@@ -18,17 +19,26 @@ const helpEmbed = new Discord.RichEmbed()
 
 commands.rate = {
   'someone': function(msg, args) {
-    const member = utils.convertToMember(msg.channel, args.join(' '));
+    let member;
+    if (args.length > 0) {
+      member = utils.convertToMember(msg.channel, args.join(' '));
+    } else {
+      member = msg.member;
+    }
     if (!member) {
       msg.channel.send(helpEmbed);
       return;
     }
     const name = member.user.tag;
+    const imageURL = member.user.avatarURL;
     const gen = Rand(client.user.id + member.id);
     const rate = Math.floor(gen() * 11);
     const emoji = rate >= 5 ? ':thumbsup:' : ':thumbsdown:';
     const article = rate === 8 ? 'an' : 'a';
-    msg.channel.send(`I give **${name}** ${article} **${rate}/10** ${emoji}`);
+    const embed = new Discord.RichEmbed().setColor(0x2F93E0)
+                  .setAuthor(name, imageURL)
+                  .setDescription(`I give this person ${article} **${rate}/10** ${emoji}`);
+    msg.channel.send(embed);
   },
   'thing': function(msg, args) {
     const thing = args.join(' ');
@@ -144,6 +154,53 @@ commands.rate = {
       msg.channel.send(helpEmbed);
       return;
     }
+  },
+  'spotify': function(msg, args) {
+    let member;
+    if (args.length > 0) {
+      member = utils.convertToMember(msg.channel, args.join(' '));
+    } else {
+      member = msg.member;
+    }
+    if (!member) {
+      msg.channel.send(helpEmbed);
+      return;
+    }
+    if (member.user.presence.game && member.user.presence.game.type === 2) {
+      const track = member.user.presence.game;
+      const title = track.details;
+      const id = track.syncID;
+      const imageURL = track.assets.largeImageURL;
+      let authors = track.state.split('; ');
+      const primaryAuthor = authors.shift();
+      let authorsString = `by ${primaryAuthor}`;
+      for (let i = 0; i < authors.length; i++) {
+        if (i < authors.length - 1) {
+          authorsString += `, ${authors[i]}`;
+        } else {
+          authorsString += ` and ${authors[i]}`;
+        }
+      }
+      const gen = Rand(client.user.id + id);
+      const rate = Math.floor(gen() * 11);
+      const emoji = rate >= 5 ? ':thumbsup:' : ':thumbsdown:';
+      const article = rate === 8 ? 'an' : 'a';
+      const embed = new Discord.RichEmbed().setColor(0x2F93E0)
+                    .setAuthor(title)
+                    .setTitle(authorsString)
+                    .setDescription(`I give this track ${article} **${rate}/10** ${emoji}`);
+      if (imageURL) {
+        embed.setThumbnail(imageURL);
+      }
+      msg.channel.send(embed);
+    } else {
+      msg.channel.send(`${member.user.tag} is not listening to anything on Spotify`);
+    }
+    // const gen = Rand(client.user.id + member.id);
+    // const rate = Math.floor(gen() * 11);
+    // const emoji = rate >= 5 ? ':thumbsup:' : ':thumbsdown:';
+    // const article = rate === 8 ? 'an' : 'a';
+    // msg.channel.send(`I give **${name}** ${article} **${rate}/10** ${emoji}`);
   },
   '_default': function(msg, args) {
     msg.channel.send(helpEmbed);
