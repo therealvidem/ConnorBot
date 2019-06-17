@@ -16,6 +16,19 @@ const helpEmbed = new Discord.RichEmbed()
                   .setColor('DARK_BLUE')
                   .setTitle('**Videm\'s Robust Rating System 9000**')
                   .setDescription(message);
+const spotifyComments = [
+  "I'm no expert, but this objectively sucks!",
+  "Your taste is... something!",
+  "No offense, but I've heard better music from a washing machine...",
+  "Oh... um... it has an interesting beat...",
+  "Eh, it sounds good... if you go far enough away from it...",
+  "As a thief, I have heard much worse things...",
+  "It's not THAT bad...",
+  "Oh, I'd listen to this again!",
+  "This would make for good heist music...",
+  "Ay, this is very good!",
+  "You have good taste!! I'm in love with this song!"
+];
 
 commands.rate = {
   'someone': function(msg, args) {
@@ -188,7 +201,7 @@ commands.rate = {
       const embed = new Discord.RichEmbed().setColor(0x2F93E0)
                     .setAuthor(title)
                     .setTitle(authorsString)
-                    .setDescription(`I give this track ${article} **${rate}/10** ${emoji}`);
+                    .setDescription(`I give this track ${article} **${rate}/10** ${emoji}. ${spotifyComments[rate]}`);
       if (imageURL) {
         embed.setThumbnail(imageURL);
       }
