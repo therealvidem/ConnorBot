@@ -260,7 +260,7 @@ commands.clownfish = {
 module.exports.commands = commands;
 module.exports.events = events;
 module.exports.setup = function() {
-  client.clownfish = new Keyv(null, {namespace: 'clownfish'});
+  client.clownfish = new Keyv('sqlite://data.db', {namespace: 'clownfish'});
   points = client.clownfish.get('points') || {};
   client.clownfish.on('error', err => console.log('Clownfish Plugin Connection Error', err));
 }

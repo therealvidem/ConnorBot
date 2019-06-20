@@ -254,6 +254,6 @@ commands.dictionary = {
 
 module.exports.commands = commands;
 module.exports.setup = function() {
-  client.dictionary = new Keyv(null, {namespace: 'dictionary'});
+  client.dictionary = new Keyv('sqlite://data.db', {namespace: 'dictionary'});
   client.dictionary.on('error', err => console.log('Dictionary Plugin Connection Error', err));
 }

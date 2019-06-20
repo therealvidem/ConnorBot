@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/therealvidem/ConnorBot#readme",
   "dependencies": {
+    "@keyv/sqlite": "^2.0.0",
     "@vitalets/google-translate-api": "^2.8.0",
     "dateformat": "^3.0.3",
     "discord.js": "^11.5.1",

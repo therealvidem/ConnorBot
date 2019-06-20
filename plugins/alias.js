@@ -83,7 +83,7 @@ commands.alias = {
 module.exports.events = events;
 module.exports.commands = commands;
 module.exports.setup = async function() {
-  client.aliases = new Keyv(null, {namespace: 'aliases'});
+  client.aliases = new Keyv('sqlite://data.db', {namespace: 'aliases'});
   aliases = await client.aliases.get('aliases') || {};
   client.aliases.on('error', err => console.log('Aliases Plugin Connection Error', err));
 }

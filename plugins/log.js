@@ -85,7 +85,7 @@ commands.channellogger = async function(msg, args) {
 module.exports.events = events;
 module.exports.commands = commands;
 module.exports.setup = function() {
-  client.loggingChannels = new Keyv(null, {namespace: 'loggingChannels' });
+  client.loggingChannels = new Keyv('sqlite://data.db', {namespace: 'loggingChannels' });
   client.channels.tap(async (channel) => {
     const logChannel = await client.loggingChannels.get(channel.id);
     if (logChannel) {
