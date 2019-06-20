@@ -16,12 +16,12 @@ function makeDir(guildDir, channelFile) {
   }
 }
 
-async function log(msg) {
+function log(msg) {
   if (!msg.guild || shuttingDown) return;
   const guildId = msg.guild.id;
   const channel = msg.channel;
   const channelId = channel.id;
-  const logChannel = await client.loggingChannels.get(channelId);
+  const logChannel = loggingChannelIds[channelId];
   if (!logChannel) return;
   const author = msg.author;
   const attachments = msg.attachments;
@@ -62,23 +62,23 @@ events.messageUpdate = function(oldmsg, newmsg) {
 commands.channellogger = async function(msg, args) {
   if (!client.checkOwner(msg)) return;
   if (args[0] === 'all') {
-    for (const channel in client.channels) {
+    for (const channel in msg.guild.channels) {
       loggingChannelIds[channel.id] = true;
       await client.loggingChannels.set(channel.id, true);
     }
     msg.channel.send('Enabled logging for all channels in this guild');
   } else {
     const channel = msg.channel;
-    let logging = await client.loggingChannels.get(channel.id);
-    if (logging === undefined) {
-      logging = false;
+    if (loggingChannelIds[channel.id]) {
+      delete loggingChannelIds[channel.id];
+    } else {
+      loggingChannelIds[channel.id] = true;
     }
-    loggingChannelIds[channel.id] = true;
-    await client.loggingChannels.set(channel.id, !logging);
-    const abled = !logging
+    await client.loggingChannels.set(channel.id, loggingChannelIds[channel.id]);
+    const abled = loggingChannelIds[channel.id]
     ? 'Enabled'
     : 'Disabled';
-    channel.send(`${abled} logging for this channel.`);
+    channel.send(`${abled} logging for this channel`);
   }
 }
 
