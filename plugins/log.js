@@ -61,11 +61,11 @@ events.messageUpdate = function(oldmsg, newmsg) {
 
 commands.channellogger = async function(msg, args) {
   if (!client.checkOwner(msg)) return;
-  if (args[0] === 'all') {
-    for (const channel in msg.guild.channels) {
+  if (args[0] === 'all' && msg.guild.available) {
+    client.channels.tap(async (channel) => {
       loggingChannelIds[channel.id] = true;
       await client.loggingChannels.set(channel.id, true);
-    }
+    });
     msg.channel.send('Enabled logging for all channels in this guild');
   } else {
     const channel = msg.channel;
