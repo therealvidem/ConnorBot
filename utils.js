@@ -12,6 +12,38 @@ function removeNonASCII(arg) {
   return arg.replace(/[^\x00-\x7F]/g, '').trim();
 }
 
+// https://codereview.stackexchange.com/questions/148363/time-delayed-function-queue
+function TimerQueue() {
+  this.currentTimer = null;
+  this.tasks = [];
+}
+
+TimerQueue.prototype.addTask = function(callback, delay, ...args) {
+  this.tasks.push({ callback: callback, delay: delay, args: args });
+  if (this.currentTimer) return;
+  this.launchNextTask();
+}
+
+TimerQueue.prototype.launchNextTask = function() {
+  if (this.currentTimer) return;
+  let self = this;
+  let nextTask = this.tasks.shift();
+  if (!nextTask) return this.clear();
+  nextTask.callback.call(null, ...nextTask.args);
+  this.currentTimer = setTimeout(() => {
+    self.currentTimer = null;
+    self.launchNextTask();
+  }, nextTask.delay);
+}
+
+TimerQueue.prototype.clear = function() {
+  if (this.currentTimer) clearTimeout(this.currentTimer);
+  this.currentTimer = null;
+  this.tasks.length = 0;
+}
+
+module.exports.TimerQueue = TimerQueue;
+
 module.exports.invertObject = function(obj) {
   const newObj = {};
   for (const prop in obj) {
