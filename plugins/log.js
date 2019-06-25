@@ -51,7 +51,7 @@ async function initializeDatabase(guild, channel) {
   return database;
 }
 
-function downloadImage(guildDir, fileName, url) {
+function downloadImage(guildDir, channelName, fileName, url) {
   return new Promise((resolve, reject) => {
     makeDir(guildDir);
     let filesDir = `${guildDir}/files`;
@@ -60,7 +60,8 @@ function downloadImage(guildDir, fileName, url) {
     }
     const date = new Date();
     let fileDir = `${filesDir}/${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}-`;
-    fileDir += `${date.getHours()}.${date.getMinutes()}.${date.getSeconds()}-${fileName}`;
+    fileDir += `${date.getHours()}.${date.getMinutes()}.${date.getSeconds()}-`;
+    fileDir += `#${channelName}-${fileName}`;
     if (!fs.existsSync(fileDir)) {
       const file = fs.createWriteStream(fileDir);
       https.get(url, response => {
@@ -111,7 +112,7 @@ async function log(msg, edited) {
   if (attachments.size) {
     const attachmentUrl = attachments.first().url;
     const parsedUrl = url.parse(attachmentUrl);
-    downloadImage(guildDir, path.basename(parsedUrl.pathname), attachmentUrl).catch((err) => {
+    downloadImage(guildDir, channel.name, path.basename(parsedUrl.pathname), attachmentUrl).catch((err) => {
       log += `FAILED TO DOWNLOAD ATTACHMENT: ${err}\n`;
       messageData['downloadedAttachment'] = true;
     });
