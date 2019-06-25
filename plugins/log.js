@@ -206,7 +206,15 @@ module.exports.setup = function() {
   client.channels.tap((channel) => {
     loggingChannels.get(channel.id).then((logging) => {
       if (logging) {
-        loggingChannelIds[channel.id] = new Keyv(`${logDbDir}/${channel.guild.id}/log.db`, { namespace: channel.id });
+        const guildDir = `${dir}/${channel.guild.id}`;
+        if (!fs.existsSync(guildDir)) {
+          fs.mkdirSync(guildDir);
+        }
+        if (!fs.existsSync(`${guildDir}/log.db`)) {
+          initializeDatabase(channel.guild, channel);
+        } else {
+          loggingChannelIds[channel.id] = new Keyv(`${logDbDir}/${channel.guild.id}/log.db`, { namespace: channel.id });
+        }
       }
     });
   });
