@@ -7,6 +7,9 @@ const presenceFormat = {
   'dnd': 'Do Not Disturb'
 };
 const MENTIONS_PATTERN = new RegExp('<@!?([0-9]+)>$');
+const ARGS_PATTERN = /[^\\\s]?"(.*?[^\\])"|[^\\\s]?'(.*?[^\\])'|[^\\\s]?`(.*?[^\\])`|([^\s]+)/g;
+// Got this pattern from: https://github.com/campbellbrendene/discord-command-parser/blob/master/src/regexps.js
+const REMAINING_QUOTES_PATTERN = /^"|"$|^'|'$|^`|`$/g;
 
 function removeNonASCII(arg) {
   return arg.replace(/[^\x00-\x7F]/g, '').trim();
@@ -43,6 +46,19 @@ TimerQueue.prototype.clear = function() {
 }
 
 module.exports.TimerQueue = TimerQueue;
+
+module.exports.parseArgs = function(argsString) {
+  if (argsString) {
+    const args = [];
+    let arg;
+    console.log(argsString);
+    while ((arg = ARGS_PATTERN.exec(argsString)) !== null) {
+      let argString = arg[0];
+      args.push(argString.replace(REMAINING_QUOTES_PATTERN, ''));
+    }
+    return args;
+  }
+}
 
 module.exports.invertObject = function(obj) {
   const newObj = {};

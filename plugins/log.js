@@ -93,7 +93,7 @@ async function log(msg, edited = false) {
   const author = msg.author;
   const attachments = msg.attachments;
   const content = String.raw`${msg.cleanContent}`;
-  const formattedDateTime = formatDate(edited ? msg.editedAt : msg.createdAt);
+  const formattedDateTime = formatDate(msg.editedAt || msg.createdAt);
   const guildDir = `${dir}/${guildId}`;
   const channelFile = `${guildDir}/${channelId}.log`;
   makeDir(guildDir, channelFile);

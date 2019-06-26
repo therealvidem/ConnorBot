@@ -1,6 +1,7 @@
 const Discord = require('discord.js');
 const fs = require('fs');
 const client = new Discord.Client();
+const utils = require('./utils.js');
 const config = require('./config.json');
 const dataDir = './data';
 const commands = {};
@@ -214,8 +215,10 @@ there's a prefix within the message.
 */
 client.on('message', (msg) => {
   if (!isCommand(msg)) return;
-  const args = msg.content.slice(config.prefix.length).trim().split(/ +/g);
-  const commandName = args.shift();
+  const msgString = msg.content.slice(2).trim();
+  const components = msgString.split(/ +/g);
+  const commandName = components.shift();
+  const args = utils.parseArgs(components.join(' '));
   const baseCommand = commands[commandName];
   if (baseCommand) {
     const command = getCommand('run', baseCommand, args);
