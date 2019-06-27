@@ -23,7 +23,8 @@ const languages = {
   'pt': '🇵🇹',
   'lo': '🇱🇦',
   'ar': '🇦🇪',
-  'sm': '🇼🇸'
+  'sm': '🇼🇸',
+  'th': '🇹🇭'
 };
 const fullLanguages = {
   'spanish': 'es',
@@ -40,7 +41,8 @@ const fullLanguages = {
   'portuguese': 'pt',
   'laotian': 'lo',
   'arabic': 'ar',
-  'samoan': 'sm'
+  'samoan': 'sm',
+  'thai': 'th'
 }
 const fullLanguagesIndex = utils.invertObject(fullLanguages);
 const flagsIndex = utils.invertObject(languages);
@@ -107,12 +109,14 @@ events.message = function(msg) {
   const id = msg.author.id;
   if (((!debug && num === chance) || (debug && id === client.ownerId))) {
     translate(msg.content, {from: 'en', to: language})
-    .then(res => {
-      incrementPoints(id, language);
-      usersCooldown.add(id);
-      setTimeout(() => {
-        usersCooldown.delete(id);
-      }, cooldown);
+    .then(async (res) => {
+      await incrementPoints(id, language);
+      if (!debug) {
+        usersCooldown.add(id);
+        setTimeout(() => {
+          usersCooldown.delete(id);
+        }, cooldown);
+      }
       msg.channel.send(`( (${flag}) ${res.text} )`);
     })
     .catch(err => {
@@ -259,8 +263,8 @@ commands.clownfish = {
 
 module.exports.commands = commands;
 module.exports.events = events;
-module.exports.setup = function() {
+module.exports.setup = async function() {
   client.clownfish = new Keyv('sqlite://data.db', {namespace: 'clownfish'});
-  points = client.clownfish.get('points') || {};
+  points = await client.clownfish.get('points') || {};
   client.clownfish.on('error', err => console.log('Clownfish Plugin Connection Error', err));
 }

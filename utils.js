@@ -51,7 +51,6 @@ module.exports.parseArgs = function(argsString) {
   if (argsString) {
     const args = [];
     let arg;
-    console.log(argsString);
     while ((arg = ARGS_PATTERN.exec(argsString)) !== null) {
       let argString = arg[0];
       args.push(argString.replace(REMAINING_QUOTES_PATTERN, ''));
