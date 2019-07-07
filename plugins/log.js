@@ -53,7 +53,7 @@ async function initializeDatabase(guild, channel) {
   return database;
 }
 
-function downloadImage(guildDir, channelName, fileName, url, emoji = true) {
+function downloadImage(guildDir, channelName, fileName, url, emoji) {
   makeDir(guildDir);
   let filesDir = `${guildDir}/files`;
   if (!fs.existsSync(filesDir)) {
@@ -83,7 +83,7 @@ function downloadImage(guildDir, channelName, fileName, url, emoji = true) {
   }
 }
 
-async function log(msg, edited = false) {
+async function log(msg) {
   if (!msg.guild || shuttingDown) return;
   const guildId = msg.guild.id;
   const channel = msg.channel;
