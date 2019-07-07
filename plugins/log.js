@@ -65,6 +65,9 @@ function downloadImage(guildDir, channelName, fileName, url, emoji) {
     fileDir += `${filesDir}/${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}-`;
     fileDir += `${date.getHours()}.${date.getMinutes()}.${date.getSeconds()}-`;
     fileDir += `#${channelName}-${fileName}`;
+    if (fileDir.length > 4096 || fileName.length > 255) {
+      fileDir = `${filesDir}/${fileName}`;
+    }
   } else {
     fileDir = `${filesDir}/${fileName}`;
   }
