@@ -190,7 +190,7 @@ commands.channellogger = async function(msg, args) {
     if (loggingChannelIds[channel.id]) {
       delete loggingChannelIds[channel.id];
     } else {
-      initializeDatabase(guild, channel.id);
+      initializeDatabase(msg.guild, channel.id);
     }
     await loggingChannels.set(channel.id, loggingChannelIds[channel.id] ? true : false);
     const abled = loggingChannelIds[channel.id]
