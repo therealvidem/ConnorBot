@@ -179,7 +179,7 @@ events.messageUpdate = editLog;
 
 commands.channellogger = async function(msg, args) {
   if (!client.checkOwner(msg)) return;
-  if (args[0] === 'all' && msg.guild.available) {
+  if (args && args[0] === 'all' && msg.guild.available) {
     client.channels.tap(async (channel) => {
       await loggingChannels.set(channel.id, true);
       initializeDatabase(guild, channel.id);
