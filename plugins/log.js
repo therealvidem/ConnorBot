@@ -187,13 +187,13 @@ commands.channellogger = async function(msg, args) {
     msg.channel.send('Enabled logging for all channels in this guild');
   } else {
     const channel = msg.channel;
-    if (loggingChannelIds[channel.id]) {
+    if (loggingChannelIds[channel.id] !== undefined) {
       delete loggingChannelIds[channel.id];
     } else {
       initializeDatabase(msg.guild, channel.id);
     }
-    await loggingChannels.set(channel.id, loggingChannelIds[channel.id] ? true : false);
-    const abled = loggingChannelIds[channel.id]
+    await loggingChannels.set(channel.id, loggingChannelIds[channel.id] !== undefined ? true : false);
+    const abled = loggingChannelIds[channel.id] !== undefined
     ? 'Enabled'
     : 'Disabled';
     channel.send(`${abled} logging for this channel`);
