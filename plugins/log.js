@@ -233,7 +233,7 @@ module.exports.unload = function(reason) {
           const guildDir = `${dir}/${channel.guild.id}`;
           const channelFile = `${guildDir}/${channel.id}.log`;
           const formattedDateTime = formatDate(new Date());
-          const shutdownMessage = `*** BOT SHUTDOWN AT ${formattedDateTime.dateString} ${formattedDateTime.timeString}`;
+          const shutdownMessage = `*** BOT SHUTDOWN AT ${formattedDateTime.dateString} ${formattedDateTime.timeString}\n\n`;
           fs.access(channelFile, fs.F_OK, (err) => {
             if (err) {
               reject(err);
