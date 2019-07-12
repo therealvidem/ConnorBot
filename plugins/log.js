@@ -35,7 +35,7 @@ function formatDate(date) {
 }
 
 function databaseExists(channelId) {
-  return loggingChannelIds[channelId]
+  return loggingChannelIds[channelId];
 }
 
 function hasEmoji(emojiId) {
@@ -99,7 +99,7 @@ async function log(msg) {
   const formattedDateTime = formatDate(msg.editedAt || msg.createdAt);
   const guildDir = `${dir}/${guildId}`;
   const channelFile = `${guildDir}/${channelId}.log`;
-  makeDir(guildDir, channelFile);
+  makeDir(guildDir);
   const messageData = {
     logDate: formattedDateTime.dateString,
     logTime: formattedDateTime.timeString,
@@ -182,7 +182,7 @@ commands.channellogger = async function(msg, args) {
   if (args && args[0] === 'all' && msg.guild.available) {
     client.channels.tap(async (channel) => {
       await loggingChannels.set(channel.id, true);
-      initializeDatabase(guild, channel.id);
+      await initializeDatabase(guild, channel);
     });
     msg.channel.send('Enabled logging for all channels in this guild');
   } else {
@@ -190,7 +190,7 @@ commands.channellogger = async function(msg, args) {
     if (loggingChannelIds[channel.id] !== undefined) {
       delete loggingChannelIds[channel.id];
     } else {
-      initializeDatabase(msg.guild, channel.id);
+      await initializeDatabase(msg.guild, channel);
     }
     await loggingChannels.set(channel.id, loggingChannelIds[channel.id] !== undefined ? true : false);
     const abled = loggingChannelIds[channel.id] !== undefined
