@@ -182,7 +182,7 @@ commands.channellogger = async function(msg, args) {
   if (args && args[0] === 'all' && msg.guild.available) {
     client.channels.tap(async (channel) => {
       await loggingChannels.set(channel.id, true);
-      await initializeDatabase(guild, channel);
+      await initializeDatabase(msg.guild, channel);
     });
     msg.channel.send('Enabled logging for all channels in this guild');
   } else {
