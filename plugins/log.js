@@ -53,7 +53,7 @@ async function initializeDatabase(guild, channel) {
   return database;
 }
 
-function downloadImage(guildDir, channelName, fileName, url, emoji) {
+function downloadAttachment(guildDir, channelName, fileName, url, emoji) {
   makeDir(guildDir);
   let filesDir = `${guildDir}/files`;
   if (!fs.existsSync(filesDir)) {
@@ -106,24 +106,85 @@ async function log(msg) {
     logChannelName: `${channel.name}`,
     logAuthor: `${author.username}#${author.discriminator}`,
     logContent: `${content}`,
+    id: msg.id,
     downloadedAttachment: false,
     attachmentUrl: undefined
   };
+  if (msg.embeds.length > 0) {
+    messageData.logContent = '[EMBED]';
+    messageData.embeds = [];
+    // I don't see why messages would have more than one embed, but just in case...
+    msg.embeds.forEach((embed, i) => {
+      let embedData = {};
+      embedData.color = embed.color;
+      embedData.timestamp = embed.timestamp;
+      embedData.url = embed.url;
+      if (embed.author) {
+        embedData.authorName = embed.author.name;
+        embedData.authorIconURL = embed.author.iconURL;
+        const parsedUrl = url.parse(embed.author.iconURL);
+        downloadTasks.addTask(downloadAttachment, downloadInterval, guildDir, channel.name, path.basename(parsedUrl.pathname), embed.author.iconURL);
+        embedData.authorURL = embed.author.url;
+      }
+      if (embed.description) {
+        embedData.description = embed.description;
+      }
+      if (embed.footer) {
+        embedData.footer = embed.footer;
+      }
+      if (embed.image && embed.image.url) {
+        embedData.imageURL = embed.image.url;
+        const parsedUrl = url.parse(embed.image.url);
+        downloadTasks.addTask(downloadAttachment, downloadInterval, guildDir, channel.name, path.basename(parsedUrl.pathname), embed.image.url);
+      }
+      if (embed.thumbnail && embed.thumbnail.url) {
+        embedData.thumbnailURL = embed.thumbnail.url;
+        const parsedUrl = url.parse(embed.thumbnail.url);
+        downloadTasks.addTask(downloadAttachment, downloadInterval, guildDir, channel.name, path.basename(parsedUrl.pathname), embed.thumbnail.url);
+      }
+      if (embed.title) {
+        embedData.title = embed.title;
+      }
+      if (embed.video) {
+        embedData.videoURL = embed.video.url;
+      }
+      if (embed.fields.length > 0) {
+        embedData.fields = [];
+        embed.fields.forEach((field) => {
+          embedData.push({
+            name: field.name,
+            value: field.value
+          });
+        });
+      }
+      messageData.embeds.push(embedData);
+    });
+  }
+  if (messageData.logContent.length === 0) {
+    messageData.logContent = '[EMPTY MESSAGE]';
+  }
   // Log string => channelid.log
   let log = `${messageData.logDate} `;
   log += `${messageData.logTime} `;
   log += `#${messageData.logChannelName} `;
   log += `${messageData.logAuthor}:\n`;
-  if (messageData.logContent.length) {
-    log += `${messageData.logContent}\n\n`;
-  }
-  if (attachments.size) {
-    const attachmentUrl = attachments.first().url;
-    const parsedUrl = url.parse(attachmentUrl);
-    downloadTasks.addTask(downloadImage, downloadInterval, guildDir, channel.name, path.basename(parsedUrl.pathname), attachmentUrl);
-    log += `ATTACHMENT: ${attachmentUrl}\n\n`;
-    messageData['downloadedAttachment'] = true;
-    messageData['attachmentUrl'] = attachmentUrl;
+  log += `${messageData.logContent}\n\n`;
+  if (attachments.size > 0) {
+    messageData.downloadedAttachment = true;
+    messageData.attachments = [];
+    let i = 0;
+    attachments.tap((attachment) => {
+      let attachmentData = {
+        id: attachment.id,
+        name: attachment.filename,
+        size: attachment.filesize,
+        url: attachment.url
+      };
+      downloadTasks.addTask(downloadAttachment, downloadInterval, guildDir, channel.name, attachmentData.name, attachmentData.url);
+      log += `ATTACHMENT${i}: ${attachmentData.url}\n\n`;
+      messageData.attachments.push(attachmentData);
+      i += 1;
+    });
   }
   let emojiRegex = /(<a?:[\w\d]+:\d+>)/g;
   let match = emojiRegex.exec(msg.content);
@@ -146,7 +207,7 @@ async function log(msg) {
         } else {
           emojiName += '.gif';
         }
-        downloadTasks.addTask(downloadImage, downloadInterval, guildDir, channel.name, emojiName, emoji.url, true);
+        downloadTasks.addTask(downloadAttachment, downloadInterval, guildDir, channel.name, emojiName, emoji.url, true);
       }
     }
     match = emojiRegex.exec(msg.content);
