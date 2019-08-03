@@ -28,9 +28,15 @@ function makeDir(guildDir) {
 }
 
 function formatDate(date) {
+  const monthString = (date.getMonth() + 1).toString().padStart(2, '0');
+  const dateString = date.getDate().toString().padStart(2, '0');
+  const hoursString = date.getHours().toString().padStart(2, '0');
+  const minutesString = date.getMinutes().toString().padStart(2, '0');
+  const secondsString = date.getSeconds().toString().padStart(2, '0');
+  const millisecondsString = date.getMilliseconds().toString().padStart(3, '0');
   return {
-    dateString: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`,
-    timeString: `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}.${date.getMilliseconds()}`
+    dateString: `${date.getFullYear()}-${monthString}-${dateString}`,
+    timeString: `${hoursString}:${minutesString}:${secondsString}.${millisecondsString}`
   };
 }
 
@@ -101,17 +107,22 @@ async function log(msg) {
   const channelFile = `${guildDir}/${channelId}.log`;
   makeDir(guildDir);
   const messageData = {
-    logDate: formattedDateTime.dateString,
-    logTime: formattedDateTime.timeString,
-    logChannelName: `${channel.name}`,
-    logAuthor: `${author.username}#${author.discriminator}`,
-    logContent: `${content}`,
     id: msg.id,
-    downloadedAttachment: false,
-    attachmentUrl: undefined
+    timestamp: msg.editedTimestamp || msg.createdTimestamp,
+    channelName: channel.name,
+    channelId: channelId,
+    author: {
+      id: author.id,
+      name: `${author.username}#${author.discriminator}`
+    },
+    content: content,
+    downloadedAttachment: false
   };
+  if (msg.member && msg.member.nickname) {
+    messageData.author.nickname = msg.member.nickname;
+  }
   if (msg.embeds.length > 0) {
-    messageData.logContent = '[EMBED]';
+    messageData.content = '[EMBED]';
     messageData.embeds = [];
     // I don't see why messages would have more than one embed, but just in case...
     msg.embeds.forEach((embed, i) => {
@@ -160,15 +171,15 @@ async function log(msg) {
       messageData.embeds.push(embedData);
     });
   }
-  if (messageData.logContent.length === 0) {
-    messageData.logContent = '[EMPTY MESSAGE]';
+  if (messageData.content.length === 0) {
+    messageData.content = '[EMPTY MESSAGE]';
   }
   // Log string => channelid.log
-  let log = `${messageData.logDate} `;
-  log += `${messageData.logTime} `;
-  log += `#${messageData.logChannelName} `;
-  log += `${messageData.logAuthor}:\n`;
-  log += `${messageData.logContent}\n\n`;
+  let log = `${formattedDateTime.dateString} `;
+  log += `${formattedDateTime.timeString} `;
+  log += `#${messageData.channelName} `;
+  log += `${messageData.author.name}:\n`;
+  log += `${messageData.content}\n\n`;
   if (attachments.size > 0) {
     messageData.downloadedAttachment = true;
     messageData.attachments = [];
@@ -218,7 +229,7 @@ async function log(msg) {
     }
   });
   // Log database => log.db
-  database.set(`${messageData.logDate}-${messageData.logTime}`, messageData).then((success) => {
+  database.set(messageData.timestamp.toString(), messageData).then((success) => {
     if (!success) {
       console.log(`Unable to log message in database: https://discordapp.com/channels/${guildId}/${chanenlId}/${msg.id}`);
     }
