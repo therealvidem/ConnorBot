@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const Keyv = require('keyv');
 const https = require('https');
 const fs = require('fs');
-const url = require('url');
+const urlmod = require('url');
 const path = require('path');
 const events = {};
 const commands = {};
@@ -133,9 +133,13 @@ async function log(msg) {
       if (embed.author) {
         embedData.authorName = embed.author.name;
         embedData.authorIconURL = embed.author.iconURL;
-        const parsedUrl = url.parse(embed.author.iconURL);
-        downloadTasks.addTask(downloadAttachment, downloadInterval, guildDir, channel.name, path.basename(parsedUrl.pathname), embed.author.iconURL);
-        embedData.authorURL = embed.author.url;
+        if (embedData.authorIconURL) {
+          const parsedUrl = urlmod.parse(embedData.authorIconURL);
+          downloadTasks.addTask(downloadAttachment, downloadInterval, guildDir, channel.name, path.basename(parsedUrl.pathname), embedData.authorIconURL);
+        }
+        if (embedData.authorURL) {
+          embedData.authorURL = embed.author.url;
+        }
       }
       if (embed.description) {
         embedData.description = embed.description;
@@ -145,13 +149,13 @@ async function log(msg) {
       }
       if (embed.image && embed.image.url) {
         embedData.imageURL = embed.image.url;
-        const parsedUrl = url.parse(embed.image.url);
-        downloadTasks.addTask(downloadAttachment, downloadInterval, guildDir, channel.name, path.basename(parsedUrl.pathname), embed.image.url);
+        const parsedUrl = urlmod.parse(embedData.imageURL);
+        downloadTasks.addTask(downloadAttachment, downloadInterval, guildDir, channel.name, path.basename(parsedUrl.pathname), embedData.imageURL);
       }
       if (embed.thumbnail && embed.thumbnail.url) {
         embedData.thumbnailURL = embed.thumbnail.url;
-        const parsedUrl = url.parse(embed.thumbnail.url);
-        downloadTasks.addTask(downloadAttachment, downloadInterval, guildDir, channel.name, path.basename(parsedUrl.pathname), embed.thumbnail.url);
+        const parsedUrl = urlmod.parse(embedData.thumbnailURL);
+        downloadTasks.addTask(downloadAttachment, downloadInterval, guildDir, channel.name, path.basename(parsedUrl.pathname), embedData.thumbnailURL);
       }
       if (embed.title) {
         embedData.title = embed.title;
@@ -162,7 +166,7 @@ async function log(msg) {
       if (embed.fields.length > 0) {
         embedData.fields = [];
         embed.fields.forEach((field) => {
-          embedData.push({
+          embedData.fields.push({
             name: field.name,
             value: field.value
           });
