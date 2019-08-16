@@ -183,6 +183,7 @@ commands.rate = {
       const track = member.user.presence.game;
       const title = track.details;
       const id = track.syncID;
+      const url = `https://open.spotify.com/track/${id}`;
       const imageURL = track.assets.largeImageURL;
       let authors = track.state.split('; ');
       const primaryAuthor = authors.shift();
@@ -199,7 +200,7 @@ commands.rate = {
       const emoji = rate >= 5 ? ':thumbsup:' : ':thumbsdown:';
       const article = rate === 8 ? 'an' : 'a';
       const embed = new Discord.RichEmbed().setColor(0x2F93E0)
-                    .setAuthor(title)
+                    .setAuthor(title, undefined, url)
                     .setTitle(authorsString)
                     .setDescription(`I give this track ${article} **${rate}/10** ${emoji}. ${spotifyComments[rate]}`);
       if (imageURL) {
