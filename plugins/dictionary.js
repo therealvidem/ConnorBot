@@ -4,7 +4,7 @@ const Discord = require('discord.js');
 const Keyv = require('keyv');
 const client = require('../main.js').getClient();
 const validLanguages = {
-  'en': 'English',
+  'en-us': 'English',
   'es': 'Spanish'
 };
 
@@ -97,7 +97,7 @@ async function get(path) {
   const options = {
     hostname: 'od-api.oxforddictionaries.com',
     port: 443,
-    path: `/api/v1/${path}`,
+    path: `/api/v2/${path}`,
     method: 'GET',
     headers: {
       'Accept': 'application/json',
@@ -166,7 +166,7 @@ commands.dictionary = {
       msg.channel.send('Something you don\'t have');
       return;
     }
-    let language = 'en';
+    let language = 'en-us';
     if (args.length > 1) {
       full_arg = args[args.length - 1];
       if (full_arg.charAt(0) === '$' && validLanguages.hasOwnProperty(language)) {
@@ -191,7 +191,7 @@ commands.dictionary = {
               if (text) {
                 let embed = new Discord.RichEmbed()
                 .setColor(0x00bdf2)
-                .setTitle(`${plain_word} (${lexicalEntry.lexicalCategory.toLowerCase()}) ${pronunciationString}`)
+                .setTitle(`${plain_word} (${lexicalEntry.lexicalCategory.text.toLowerCase()}) ${pronunciationString}`)
                 .setDescription('```json\n' + text + '```')
                 .setFooter('Using the Oxford English Dictionary');
                 msg.channel.send(embed);
@@ -214,7 +214,7 @@ commands.dictionary = {
       msg.channel.send(`Correct usage: ${client.prefix}dictionary synonyms <word> [$language]`);
       return;
     }
-    let language = 'en';
+    let language = 'en-us';
     if (args.length > 1) {
       full_arg = args[args.length - 1];
       if (full_arg.charAt(0) === '$' && validLanguages.hasOwnProperty(language)) {
@@ -223,7 +223,7 @@ commands.dictionary = {
         plain_word = args.slice(0, -1).join(' ');
       }
     }
-    get(`entries/${language}/${word}/synonyms`).then(
+    get(`thesaurus/${language}/${word}`).then(
       (data) => {
         const lexicalEntries = data.results[0].lexicalEntries;
         if (lexicalEntries) {

@@ -194,11 +194,13 @@ function getCommand(commandName, context, args) {
   if (typeof command === 'function') {
     return command;
   } else if (typeof command === 'object') {
-    const subCommand = command[args[0]];
-    if (subCommand) {
-      return getCommand(args.shift(), command, args);
-    } else if (command['_default']) {
-      return command['_default'];
+    if (args && args.length > 0) {
+      const subCommand = command[args[0]];
+      if (subCommand) {
+        return getCommand(args.shift(), command, args);
+      } else if (command['_default']) {
+        return command['_default'];
+      }
     }
   }
 }
