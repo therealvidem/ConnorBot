@@ -24,8 +24,8 @@ commands.gettime = function(msg, args) {
     const currentDate = new Date().toLocaleString();
     msg.channel.send(currentDate);
   } else {
-    const snowflake = parseInt(args[0]);
-    if (isNaN(snowflake)) {
+    const snowflake = args[0];
+    if (parseInt(snowflake) === NaN) {
       msg.channel.send('That is not a valid snowflake');
       return;
     }
