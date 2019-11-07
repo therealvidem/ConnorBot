@@ -13,9 +13,9 @@ const emojisSaved = new Keyv('sqlite://data.db', { namespace: 'loggedEmojis' });
 const client = require('../main.js').getClient();
 const utils = require('../utils.js');
 const downloadTasks = new utils.TimerQueue();
-const downloadInterval = 2 * 1000;
+const downloadInterval = 15 * 1000;
 let shuttingDown = false; // We need this because sometimes the bot logs "<prefix>;shutdown"
-let loggingChannelIds = {};
+let loggingGuilds = {};
 let savedEmojis = {};
 
 function makeDir(guildDir) {
@@ -40,22 +40,27 @@ function formatDate(date) {
   };
 }
 
-function databaseExists(channelId) {
-  return loggingChannelIds[channelId];
+function databaseExists(guildId, channelId) {
+  if (!loggingGuilds[guildId]) return;
+  return loggingGuilds[guildId][channelId];
 }
 
 function hasEmoji(emojiId) {
   return savedEmojis[emojiId];
 }
 
-async function initializeDatabase(guild, channel) {
-  if (databaseExists(channel.id)) return;
-  makeDir(`${dir}/${guild.id}`);
-  const database = new Keyv(`${logDbDir}/${guild.id}/log.db`, { namespace: channel.id });
-  await database.set('guildId', guild.id);
+async function initializeDatabase(guild, channelId, channelName) {
+  if (databaseExists(channelId)) return;
+  const guildId = guild.id;
+  makeDir(`${dir}/${guildId}`);
+  const database = new Keyv(`${logDbDir}/${guildId}/log.db`, { namespace: channelId });
+  await database.set('guildId', guildId);
   await database.set('guildName', guild.name);
-  await database.set('channelName', channel.name);
-  loggingChannelIds[channel.id] = database;
+  await database.set('channelName', channelName);
+  if (!loggingGuilds[guildId]) {
+    loggingGuilds[guildId] = {};
+  }
+  loggingGuilds[guildId][channelId] = database;
   return database;
 }
 
@@ -92,12 +97,12 @@ function downloadAttachment(guildDir, channelName, fileName, url, emoji) {
   }
 }
 
-async function log(msg) {
+async function logMessage(msg) {
   if (!msg.guild || shuttingDown) return;
   const guildId = msg.guild.id;
   const channel = msg.channel;
   const channelId = channel.id;
-  const database = loggingChannelIds[channelId];
+  const database = loggingGuilds[guildId][channelId];
   if (!database) return;
   const author = msg.author;
   const attachments = msg.attachments;
@@ -241,35 +246,40 @@ async function log(msg) {
 }
 
 async function editLog(oldmsg, newmsg) {
-  let newmsgContentHolder = newmsg.content;
+  let newmsgDummy = Object.assign({}, newmsg);
   let oldraw = String.raw`${oldmsg.cleanContent}`;
   let newraw = String.raw`${newmsg.cleanContent}`;
-  newmsg.content = `EDIT:\nBefore: ${oldraw}\nAfter: ${newraw}`;
-  log(newmsg, true);
-  newmsg.content = newmsgContentHolder;
+  newmsgDummy.content = `EDIT:\nBefore: ${oldraw}\nAfter: ${newraw}`;
+  logMessage(newmsgDummy);
 }
 
-events.message = log;
+events.message = logMessage;
 
 events.messageUpdate = editLog;
 
 commands.channellogger = async function(msg, args) {
-  if (!client.checkOwner(msg)) return;
-  if (args && args[0] === 'all' && msg.guild.available) {
-    client.channels.tap(async (channel) => {
-      await loggingChannels.set(channel.id, true);
-      await initializeDatabase(msg.guild, channel);
-    });
-    msg.channel.send('Enabled logging for all channels in this guild');
+  if (!client.checkOwner(msg) || !msg.guild.available) return;
+  const guild = msg.guild;
+  if (args) {
+    if (args[0] === 'all') {
+      guild.channels.tap(async (channel) => {
+        await loggingChannels.set(channel.id, true);
+        await initializeDatabase(guild, channel.id, channel.name);
+      });
+      msg.channel.send('Enabled logging for all channels in this guild');
+    } else {
+      msg.channel.send(`You only need to execute "${client.prefix}channellogger" inside the channel you want to log`);
+    }
   } else {
     const channel = msg.channel;
-    if (loggingChannelIds[channel.id] !== undefined) {
-      delete loggingChannelIds[channel.id];
+    const channelId = channel.id;
+    if (loggingGuilds[guild.id][channelId] !== undefined) {
+      delete loggingGuilds[guild.id][channelId];
     } else {
-      await initializeDatabase(msg.guild, channel);
+      await initializeDatabase(guild, channelId, channel.name);
     }
-    await loggingChannels.set(channel.id, loggingChannelIds[channel.id] !== undefined ? true : false);
-    const abled = loggingChannelIds[channel.id] !== undefined
+    await loggingChannels.set(channelId, loggingGuilds[guild.id][channelId] !== undefined ? true : false);
+    const abled = loggingGuilds[guild.id][channelId] !== undefined
     ? 'Enabled'
     : 'Disabled';
     channel.send(`${abled} logging for this channel`);
@@ -285,14 +295,18 @@ module.exports.setup = function() {
   client.channels.tap((channel) => {
     loggingChannels.get(channel.id).then((logging) => {
       if (logging) {
-        const guildDir = `${dir}/${channel.guild.id}`;
+        const guildId = channel.guild.id;
+        const guildDir = `${dir}/${guildId}`;
         if (!fs.existsSync(guildDir)) {
           fs.mkdirSync(guildDir);
         }
         if (!fs.existsSync(`${guildDir}/log.db`)) {
-          initializeDatabase(channel.guild, channel);
+          initializeDatabase(channel.guild, channel.id, channel.name);
         } else {
-          loggingChannelIds[channel.id] = new Keyv(`${logDbDir}/${channel.guild.id}/log.db`, { namespace: channel.id });
+          if (!loggingGuilds[guildId]) {
+            loggingGuilds[guildId] = {};
+          }
+          loggingGuilds[guildId][channel.id] = new Keyv(`${logDbDir}/${guildId}/log.db`, { namespace: channel.id });
         }
       }
     });

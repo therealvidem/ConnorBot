@@ -221,7 +221,7 @@ commands.chess = {
       setupGame(msg, channel, opponent);
       return;
     }
-    client.promptYesNo(msg.channel, opponent, 10 * 1000, `${opponent} ${msg.author.tag} has challenged you to a chess match. Do you accept? (yes/no)`)
+    client.promptYesNo(msg.channel, opponent.id, 10 * 1000, `${opponent} ${msg.author.tag} has challenged you to a chess match. Do you accept? (yes/no)`)
     .then(
       (response, responseMsg) => {
         if (response) {

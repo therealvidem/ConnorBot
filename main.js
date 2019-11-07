@@ -42,10 +42,10 @@ function isOwner(author) {
   return author.id == client.ownerId;
 }
 
-function promptYesNo(channel, target, waitTime, content) {
+function promptYesNo(channel, targetMember, waitTime, content) {
   return new Promise((resolve, reject) => {
     channel.send(content).then(() => {
-      channel.awaitMessages(response => response.content, {
+      channel.awaitMessages(response => response.author.id === targetMember.id, {
         max: 1,
         time: waitTime,
         errors: ['time']
@@ -56,7 +56,8 @@ function promptYesNo(channel, target, waitTime, content) {
           reject();
           return;
         }
-        const response = responseMsg.content.toLowerCase() === 'yes';
+        const content = responseMsg.content.toLowerCase();
+        const response = content === 'yes' || content === 'y';
         resolve(response, responseMsg);
       })
       .catch((collected) => {
@@ -65,7 +66,8 @@ function promptYesNo(channel, target, waitTime, content) {
           reject();
           return;
         }
-        const response = responseMsg.content.toLowerCase() === 'yes';
+        const content = responseMsg.content.toLowerCase();
+        const response = content === 'yes' || content === 'y';
         resolve(response, responseMsg);
       });
     });
@@ -228,6 +230,10 @@ client.on('message', (msg) => {
       command(msg, args);
     }
   }
+});
+
+client.on('channelCreate', (channel) => {
+  console.log(channel);
 });
 
 if (config.token) {

@@ -23,7 +23,6 @@ function TimerQueue() {
 
 TimerQueue.prototype.addTask = function(callback, delay, ...args) {
   this.tasks.push({ callback: callback, delay: delay, args: args });
-  if (this.currentTimer) return;
   this.launchNextTask();
 }
 
