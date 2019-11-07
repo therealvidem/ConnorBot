@@ -203,7 +203,7 @@ commands.chess = {
       channel.send(`You are already in a game. Do "${client.prefix}chess stop" to end the game.`);
       return;
     }
-    if (args.length < 1) {
+    if (!args || args.length < 1) {
       channel.send(`The correct usage is: ${client.prefix}chess start <opponent>`);
       return;
     }

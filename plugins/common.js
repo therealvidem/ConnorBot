@@ -15,12 +15,12 @@ commands.ping = function(msg, args) {
 }
 
 commands.echo = function(msg, args) {
-  if (args.length < 1) return;
+  if (!args || args.length < 1) return;
   msg.channel.send(args.join(' '));
 }
 
 commands.gettime = function(msg, args) {
-  if (args.length < 1) {
+  if (!args || args.length < 1) {
     const currentDate = new Date().toLocaleString();
     msg.channel.send(currentDate);
   } else {
@@ -40,7 +40,7 @@ function sendProperty(msg, obj, prop, name) {
 function getMember(msg, args) {
   const query = args.join(' ');
   let member = msg.member;
-  if (args.length > 0) {
+  if (args && args.length > 0) {
     member = msg.mentions.members.first() || utils.convertToMember(msg.channel, query);
   }
   if (!member) {
@@ -186,7 +186,7 @@ commands.member = {
       });
     },
     'replace': function(msg, args) {
-      if (args.length < 3) {
+      if (!args || args.length < 3) {
         msg.channel.send(`Correct usage: ${client.prefix}member role replace <member> <roletoreplace> <newrole>`);
         return;
       }

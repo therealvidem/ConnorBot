@@ -33,7 +33,7 @@ const spotifyComments = [
 commands.rate = {
   'someone': function(msg, args) {
     let member;
-    if (args.length > 0) {
+    if (args && args.length > 0) {
       member = utils.convertToMember(msg.channel, args.join(' '));
     } else {
       member = msg.member;
@@ -66,7 +66,7 @@ commands.rate = {
     msg.channel.send(`I give **${thing}** ${article} **${rate}/10** ${emoji}`);
   },
   'ship': function(msg, args) {
-    if (args.length !== 2) {
+    if (!args || args.length !== 2) {
       msg.channel.send(helpEmbed);
       return;
     }
@@ -89,7 +89,7 @@ commands.rate = {
     msg.channel.send(`I give the **${shipName}** ship ${article} **${rate}/10** ${emoji}`);
   },
   'regularship': function(msg, args) {
-    if (args.length !== 2) {
+    if (!args || args.length !== 2) {
       msg.channel.send(helpEmbed);
       return;
     }
@@ -104,7 +104,7 @@ commands.rate = {
     msg.channel.send(`I give the **${shipName}** ship ${article} **${rate}/10** ${emoji}`);
   },
   'list': function(msg, args) {
-    if (args.length > 1) {
+    if (args && args.length > 1) {
       if (args.length > 25) {
         msg.channel.send('List cannot exceed 25 items');
         return;
@@ -130,7 +130,7 @@ commands.rate = {
     }
   },
   'people': function(msg, args) {
-    if (args.length > 1) {
+    if (args && args.length > 1) {
       if (args.length > 25) {
         msg.channel.send('List cannot exceed 25 items');
         return;
@@ -170,7 +170,7 @@ commands.rate = {
   },
   'spotify': function(msg, args) {
     let member;
-    if (args.length > 0) {
+    if (args && args.length > 0) {
       member = utils.convertToMember(msg.channel, args.join(' '));
     } else {
       member = msg.member;
