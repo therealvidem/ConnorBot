@@ -318,7 +318,7 @@ module.exports.unload = function(reason) {
     if (reason === 'shutdown') {
       shuttingDown = true;
       client.channels.tap(async (channel) => {
-        const database = loggingChannelIds[channel.id];
+        const database = loggingGuilds[channel.guild.id][channel.id];
         if (database) {
           const guildDir = `${dir}/${channel.guild.id}`;
           const channelFile = `${guildDir}/${channel.id}.log`;
