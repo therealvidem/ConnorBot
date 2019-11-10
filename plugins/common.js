@@ -10,7 +10,7 @@ const utils = require('../utils.js');
 // }
 
 commands.ping = function(msg, args) {
-  msg.channel.send('Pong.');
+  msg.channel.send('Pong!');
 }
 
 commands.echo = function(msg, args) {
