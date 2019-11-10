@@ -2,3 +2,5 @@ node_modules
 data
 data.db
 config.json
+test.js
+.vscode/launch.json
