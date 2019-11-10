@@ -167,7 +167,7 @@ commands.dictionary = {
       return;
     }
     let language = 'en-us';
-    if (args.length > 1) {
+    if (args && args.length > 1) {
       full_arg = args[args.length - 1];
       if (full_arg.charAt(0) === '$' && validLanguages.hasOwnProperty(language)) {
         language = args[args.length - 1].slice(1);
@@ -215,7 +215,7 @@ commands.dictionary = {
       return;
     }
     let language = 'en-us';
-    if (args.length > 1) {
+    if (args && args.length > 1) {
       full_arg = args[args.length - 1];
       if (full_arg.charAt(0) === '$' && validLanguages.hasOwnProperty(language)) {
         language = args[args.length - 1].slice(1);

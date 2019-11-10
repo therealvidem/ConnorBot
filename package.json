@@ -24,6 +24,7 @@
     "keyv": "^3.1.0",
     "node-opus": "^0.3.2",
     "seedrandom": "^3.0.1",
+    "sqlite3": "^4.1.0",
     "youtube-search": "^1.1.4",
     "ytdl-core": "^0.29.2"
   }
