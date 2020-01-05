@@ -17,13 +17,15 @@
   },
   "homepage": "https://github.com/therealvidem/ConnorBot#readme",
   "dependencies": {
-    "keyv": "^4.0.0",
     "@keyv/sqlite": "^2.0.2",
     "@vitalets/google-translate-api": "^2.8.0",
+    "aws-sdk": "^2.597.0",
     "dateformat": "^3.0.3",
     "discord.js": "^11.5.1",
+    "keyv": "^4.0.0",
     "node-opus": "^0.3.2",
     "seedrandom": "^3.0.1",
+    "stream-buffers": "^3.0.2",
     "youtube-search": "^1.1.4",
     "ytdl-core": "^1.0.3"
   }

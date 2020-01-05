@@ -128,7 +128,7 @@ function shutdownPlugin(pluginName) {
 module.exports.shutdownPlugin = shutdownPlugin; // For restarting
 
 // Simply removes the events and commands of the specified plugin, then sets it back up again.
-commands.load = function(msg, args) {
+commands.load = async function(msg, args) {
   const filename = `${args[0]}.js`;
   const file = `./plugins/${filename}`;
   const cachePlugin = plugins[filename];
@@ -152,7 +152,7 @@ commands.load = function(msg, args) {
   msg.channel.send('Successfully loaded.');
 };
 
-commands.unload = function(msg, args) {
+commands.unload = async function(msg, args) {
   const filename = `${args[0]}.js`;
   const file = `./plugins/${filename}`;
   if (!fs.existsSync(file)) {
@@ -236,12 +236,19 @@ client.on('channelCreate', (channel) => {
   console.log(channel);
 });
 
-if (config.token) {
+function init() {
   client.ownerId = config.ownerId;
   client.prefix = config.prefix;
+  client.voiceConnections = {};
   client.login(config.token).catch((error) => {
     console.error('Invalid token');
   });
+}
+
+module.exports.init = init;
+
+if (config.token) {
+  init();
 } else {
   console.error('Add a valid token to the "config.json"');
 }
