@@ -11,7 +11,7 @@ const Polly = new AWS.Polly({
     signatureVersion: 'v4',
     region: 'us-west-1'
 });
-const cooldown = 2 * 1000;
+const cooldown = 20 * 1000;
 const usersCooldown = new Set();
 const commands = {};
 
