@@ -12,7 +12,7 @@ const Polly = new AWS.Polly({
     region: 'us-west-1'
 });
 const voiceId = 'Miguel';
-const cooldown = 2 * 1000;
+const cooldown = 20 * 1000;
 const apostrophePattern = /\w(')\w/;
 const ampersandPattern = /(&)(?![^\s]+;)/;
 const usersCooldown = new Set();
