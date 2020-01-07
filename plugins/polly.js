@@ -17,6 +17,7 @@ const apostrophePattern = /\w(')\w/;
 const ampersandPattern = /(&)(?![^\s]+;)/;
 const usersCooldown = new Set();
 const commands = {};
+let waitStart = null;
 
 function playStream(msg, stream) {
     msg.member.voiceChannel.join().then(connection => {
@@ -46,43 +47,56 @@ function say(msg, text, type) {
         'VoiceId': voiceId
     };
     
-    Polly.synthesizeSpeech(params, (err, data) => {
-        if (err) {
-            if (err.code === 'InvalidSsmlException') {
-                msg.channel.send('That is invalid SSML code');
-            } else {
-                msg.channel.send('An error occured');
-                console.log(err.code);
-            }
-        } else if (data) {
-            if (data.AudioStream instanceof Buffer) {
-
-                // https://stackoverflow.com/questions/47089230/how-to-convert-buffer-to-stream-in-nodejs
-                let stream = new Stream.Readable({
-                    read() {
-                        this.push(data.AudioStream);
-                        this.push(null);
-                    }
-                });
-                
-                const voiceConnection = client.voiceConnections[msg.guild.id];
-                if (voiceConnection && voiceConnection.dispatcher && !voiceConnection.dispatcher.destroyed) {
-                    voiceConnection.dispatcher.end();
-                    setTimeout(() => {
-                        playStream(msg, stream);
-                    }, 1 * 1000);
+    if (waitStart === null || Date.now() - waitStart >= 0) {
+        waitStart = null;
+        Polly.synthesizeSpeech(params, (err, data) => {
+            if (err) {
+                if (err.code === 'InvalidSsmlException') {
+                    msg.channel.send('That is invalid SSML code');
+                    msg.channel.send(err.message);
                 } else {
-                    playStream(msg, stream);
+                    msg.channel.send('An error occured');
+                    if (err.retryDelay) {
+                        if (waitStart) {
+                            waitStart += err.retryDelay;
+                        } else {
+                            waitStart = Date.now() + err.retryDelay;
+                        }
+                    }
+                    console.log(err.code);
                 }
-
-                usersCooldown.add(msg.author.id);
-                setTimeout(() => {
-                    usersCooldown.delete(msg.author.id);
-                }, cooldown);
-
+            } else if (data) {
+                if (data.AudioStream instanceof Buffer) {
+    
+                    // https://stackoverflow.com/questions/47089230/how-to-convert-buffer-to-stream-in-nodejs
+                    let stream = new Stream.Readable({
+                        read() {
+                            this.push(data.AudioStream);
+                            this.push(null);
+                        }
+                    });
+                    
+                    const voiceConnection = client.voiceConnections[msg.guild.id];
+                    if (voiceConnection && voiceConnection.dispatcher && !voiceConnection.dispatcher.destroyed) {
+                        voiceConnection.dispatcher.end();
+                        setTimeout(() => {
+                            playStream(msg, stream);
+                        }, 1 * 1000);
+                    } else {
+                        playStream(msg, stream);
+                    }
+    
+                    usersCooldown.add(msg.author.id);
+                    setTimeout(() => {
+                        usersCooldown.delete(msg.author.id);
+                    }, cooldown);
+    
+                }
             }
-        }
-    });
+        });
+    } else {
+        msg.channel.send('You must wait before you may use this command again');
+    }
 
 }
 
