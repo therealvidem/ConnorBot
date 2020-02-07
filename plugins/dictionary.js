@@ -249,7 +249,7 @@ commands.dictionary = {
                                 if (text) {
                                     let embed = new Discord.RichEmbed()
                                         .setColor(0x00bdf2)
-                                        .setTitle(`${plain_word} (${lexicalEntry.lexicalCategory.text.toLowerCase()}) ${pronunciationString}`)
+                                        .setTitle(`${wordId} (${lexicalEntry.lexicalCategory.text.toLowerCase()}) ${pronunciationString}`)
                                         .setDescription('```json\n' + text + '```')
                                         .setFooter('Using the Oxford English Dictionary');
                                     msg.channel.send(embed);
