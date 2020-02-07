@@ -1,5 +1,6 @@
 const commands = {};
 const https = require('https');
+const querystring = require('querystring');
 const Discord = require('discord.js');
 const Keyv = require('keyv');
 const client = require('../main.js').getClient();
@@ -91,7 +92,40 @@ function parseDefEntries(entries) {
     return text;
 }
 
-async function get(path) {
+async function getSuggestion(query) {
+    const options = {
+        hostname: 'api.datamuse.com',
+        port: 443,
+        path: `/sug?${query}`,
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json'
+        }
+    };
+    return new Promise((resolve, reject) => {
+        https.get(options, (res) => {
+            let data = '';
+            res.on('data', (chunk) => {
+                data += chunk;
+            }).on('end', () => {
+                if (res.statusCode === 200) {
+                    try {
+                        jsonData = JSON.parse(data);
+                        resolve(jsonData);
+                    } catch (exc) {
+                        reject(exc);
+                    }
+                } else if (res.statusCode === 404) {
+                    reject(404);
+                }
+            }).on('error', (err) => {
+                reject(err);
+            });
+        });
+    });
+}
+
+async function getOxford(path) {
     const appId = await client.dictionary.get('id');
     const appKey = await client.dictionary.get('key');
     const options = {
@@ -105,28 +139,48 @@ async function get(path) {
             'app_key': appKey || ''
         }
     };
-    return new Promise(function (resolve, err) {
+    return new Promise((resolve, reject) => {
         https.get(options, (res) => {
             let data = '';
             res.on('data', (chunk) => {
-                    data += chunk;
-                })
-                .on('end', () => {
-                    if (res.statusCode === 200) {
-                        try {
-                            jsonData = JSON.parse(data);
-                            resolve(jsonData);
-                        } catch (exc) {
-                            err(exc);
-                        }
-                    } else if (res.statusCode === 404) {
-                        err(404)
+                data += chunk;
+            }).on('end', () => {
+                if (res.statusCode === 200) {
+                    try {
+                        jsonData = JSON.parse(data);
+                        resolve(jsonData);
+                    } catch (exc) {
+                        reject(exc);
                     }
-                })
-                .on('error', (er) => {
-                    err(er);
-                });
+                } else if (res.statusCode === 404) {
+                    reject(404);
+                }
+            }).on('error', (err) => {
+                reject(err);
+            });
         });
+    });
+}
+
+async function getRootOf(query, language) {
+    return new Promise((resolve, reject) => {
+        getSuggestion(querystring.stringify({
+            's': query,
+            'max': 1,
+            'v': language == 'en-us' ? '' : language
+        })).then(
+            (data) => {
+                const firstResult = data[0];
+                if (firstResult) {
+                    resolve(firstResult.word);
+                } else {
+                    reject(404);
+                }
+            },
+            (err) => {
+                reject(err);
+            }
+        );
     });
 }
 
@@ -165,6 +219,9 @@ commands.dictionary = {
         if (word === 'life') {
             msg.channel.send('Something you don\'t have');
             return;
+        } else if (word === 'death') {
+            msg.channel.send('Something I want');
+            return;
         }
         let language = 'en-us';
         if (args && args.length > 1) {
@@ -175,37 +232,41 @@ commands.dictionary = {
                 plain_word = args.slice(0, -1).join(' ');
             }
         }
-        get(`entries/${language}/${word}`).then(
-            (data) => {
-                const lexicalEntries = data.results[0].lexicalEntries;
-                if (lexicalEntries) {
-                    for (let i = 0; i < lexicalEntries.length; i++) {
-                        setTimeout(() => {
-                            const lexicalEntry = lexicalEntries[i];
-                            const text = parseDefEntries(lexicalEntry.entries);
-                            let pronunciationString = '';
-                            if (lexicalEntry.pronunciations) {
-                                const pronunciations = lexicalEntry.pronunciations.map(p => p.phoneticSpelling).join('] [');
-                                pronunciationString = ("[" + pronunciations + "]");
-                            }
-                            if (text) {
-                                let embed = new Discord.RichEmbed()
-                                    .setColor(0x00bdf2)
-                                    .setTitle(`${plain_word} (${lexicalEntry.lexicalCategory.text.toLowerCase()}) ${pronunciationString}`)
-                                    .setDescription('```json\n' + text + '```')
-                                    .setFooter('Using the Oxford English Dictionary');
-                                msg.channel.send(embed);
-                            }
-                        }, i * 500);
+        getRootOf(word, language).then((wordId) => {
+            getOxford(`entries/${language}/${querystring.escape(wordId)}`).then(
+                (data) => {
+                    const lexicalEntries = data.results[0].lexicalEntries;
+                    if (lexicalEntries) {
+                        for (let i = 0; i < lexicalEntries.length; i++) {
+                            setTimeout(() => {
+                                const lexicalEntry = lexicalEntries[i];
+                                const text = parseDefEntries(lexicalEntry.entries);
+                                let pronunciationString = '';
+                                if (lexicalEntry.pronunciations) {
+                                    const pronunciations = lexicalEntry.pronunciations.map(p => p.phoneticSpelling).join('/ /');
+                                    pronunciationString = ("/" + pronunciations + "/");
+                                }
+                                if (text) {
+                                    let embed = new Discord.RichEmbed()
+                                        .setColor(0x00bdf2)
+                                        .setTitle(`${plain_word} (${lexicalEntry.lexicalCategory.text.toLowerCase()}) ${pronunciationString}`)
+                                        .setDescription('```json\n' + text + '```')
+                                        .setFooter('Using the Oxford English Dictionary');
+                                    msg.channel.send(embed);
+                                }
+                            }, i * 500);
+                        }
+                    } else {
+                        msg.channel.send('No entries found');
                     }
-                } else {
-                    msg.channel.send('No entries found');
+                },
+                (err) => {
+                    errorNotify(msg, err);
                 }
-            },
-            (err) => {
-                errorNotify(msg, err);
-            }
-        );
+            )
+        }).catch((err) => {
+            errorNotify(msg, err);
+        });
     },
     'synonyms': function (msg, args) {
         let word = args.join('_');
@@ -223,7 +284,7 @@ commands.dictionary = {
                 plain_word = args.slice(0, -1).join(' ');
             }
         }
-        get(`thesaurus/${language}/${word}`).then(
+        getOxford(`thesaurus/${language}/${word}`).then(
             (data) => {
                 const lexicalEntries = data.results[0].lexicalEntries;
                 if (lexicalEntries) {
