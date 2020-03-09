@@ -203,6 +203,8 @@ function getCommand(commandName, context, args) {
             } else if (command['_default']) {
                 return command['_default'];
             }
+        } else if (command['_default']) {
+            return command['_default'];
         }
     }
 }

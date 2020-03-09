@@ -4,18 +4,18 @@ const main = require('../main.js');
 const utils = require('../utils.js');
 const commands = {};
 const client = main.getClient();
-let message = `List of commands available for ${client.prefix}rate:\n`;
-message += '`' + client.prefix + 'rate someone [member]`\n';
-message += '`' + client.prefix + 'rate ship [person] [person]`\n';
-message += '`' + client.prefix + 'rate regularship [person] [person]`\n';
-message += '`' + client.prefix + 'rate thing [thingy]`\n';
-message += '`' + client.prefix + 'rate list [thingies]`\n';
-message += '`' + client.prefix + 'rate people [people]`\n';
-message += '`' + client.prefix + 'rate spotify [member]`\n';
+let helpMessage = `List of commands available for ${client.prefix}rate:\n`;
+helpMessage += '`' + client.prefix + 'rate someone [member]`\n';
+helpMessage += '`' + client.prefix + 'rate ship [person] [person]`\n';
+helpMessage += '`' + client.prefix + 'rate regularship [person] [person]`\n';
+helpMessage += '`' + client.prefix + 'rate thing [thingy]`\n';
+helpMessage += '`' + client.prefix + 'rate list [thingies]`\n';
+helpMessage += '`' + client.prefix + 'rate people [people]`\n';
+helpMessage += '`' + client.prefix + 'rate spotify [member]`\n';
 const helpEmbed = new Discord.RichEmbed()
     .setColor('DARK_BLUE')
     .setTitle('**Videm\'s Robust Rating System 9000**')
-    .setDescription(message);
+    .setDescription(helpMessage);
 const spotifyComments = [
     "I'm no expert, but this objectively sucks!",
     "Your taste is... something!",
