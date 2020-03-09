@@ -6,7 +6,10 @@ commands.choose = function(msg, args) {
         msg.channel.send("You must provide at least two options");
         return;
     }
-    const gen = Rand(msg.author.id);
+    const filteredArgs = args.map((item) => item.toLowerCase())
+                             .sort()
+                             .join(' ');
+    const gen = Rand(`${msg.author.id}${filteredArgs}`);
     const randomItem = args[Math.floor(gen() * args.length)];
     msg.channel.send(`Hmm... I choose ${randomItem}!`);
 }
