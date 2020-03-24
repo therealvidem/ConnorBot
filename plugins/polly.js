@@ -23,7 +23,8 @@ function playStream(msg, stream) {
     msg.member.voiceChannel.join().then(connection => {
         client.voiceConnections[msg.guild.id] = {
             'dispatcher': connection.playStream(stream, {
-                'volume': 100
+                'birate': 128,
+                'type': 'ogg/opus'
             })
         }
         client.voiceConnections[msg.guild.id].dispatcher.on('end', (reason) => {
@@ -75,7 +76,7 @@ function say(msg, text, type) {
                             this.push(null);
                         }
                     });
-                    
+
                     const voiceConnection = client.voiceConnections[msg.guild.id];
                     if (voiceConnection && voiceConnection.dispatcher && !voiceConnection.dispatcher.destroyed) {
                         voiceConnection.dispatcher.end();
