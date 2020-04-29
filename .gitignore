@@ -511,3 +511,4 @@ MigrationBackup/
 # End of https://www.gitignore.io/api/csharp,visualstudio
 
 **/settings.json
+ConnorBot/Properties/

@@ -2,7 +2,7 @@
   "profiles": {
     "ConnorBot": {
       "commandName": "Project",
-      "workingDirectory": "C:\\Users\\videm\\Documents\\ConnorBot\\ConnorBot"
+      "workingDirectory": "C:\\Users\\videm\\Documents\\ConnorBot"
     }
   }
 }
