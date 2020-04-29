@@ -30,19 +30,15 @@ namespace ConnorBot
         /// <returns>Void.</returns>
         public async Task MainAsync()
         {
-            string environment = Environment.GetEnvironmentVariable("Environment");
-
-            if (!File.Exists("settings.json") && environment != "development")
+            if (!File.Exists("settings.json"))
             {
                 Settings settings = GetSettings();
-                using (FileStream settingsFile = File.Create("settings.json"))
+                string settingsJsonString = JsonSerializer.Serialize(settings, new JsonSerializerOptions
                 {
-                    JsonSerializer.Serialize<Settings>(settings, new JsonSerializerOptions
-                    {
-                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                        WriteIndented = true
-                    });
-                }
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                    WriteIndented = true
+                });
+                File.WriteAllText("settings.json", settingsJsonString);
             }
 
             IConfigurationRoot config = new ConfigurationBuilder()
@@ -53,7 +49,6 @@ namespace ConnorBot
             client = new DiscordSocketClient();
 
             client.Log += Logger.Log;
-            client.MessageReceived += MessageReceived;
 
             await client.LoginAsync(TokenType.Bot, config["token"]);
             await client.StartAsync();
@@ -61,14 +56,10 @@ namespace ConnorBot
             await Task.Delay(-1);
         }
 
-        public async Task MessageReceived(SocketMessage message)
-        {
-            if (message.Content == "c.ping")
-            {
-                await message.Channel.SendMessageAsync("Pong!");
-            }
-        }
-
+        /// <summary>
+        /// Gets the setting from console input, if <c>settings.json</c> is not found.
+        /// </summary>
+        /// <returns>A <see cref="Settings"/> object representing the inputted settings</returns>
         public Settings GetSettings()
         {
             Console.WriteLine("A settings.json file was not found.");
@@ -76,9 +67,7 @@ namespace ConnorBot
             Console.Write("Input bot token: ");
             string token = Console.ReadLine().Replace("\n", string.Empty);
 
-            Console.WriteLine();
-
-            Console.Write("Input owner id (optional):");
+            Console.Write("Input owner id (optional): ");
             string ownerID = Console.ReadLine().Replace("\n", string.Empty);
 
             return new Settings()
