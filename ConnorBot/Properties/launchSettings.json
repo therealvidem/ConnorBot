@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ConnorBot": {
+      "commandName": "Project",
+      "workingDirectory": "C:\\Users\\videm\\Documents\\ConnorBot\\ConnorBot"
+    }
+  }
+}
