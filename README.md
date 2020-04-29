@@ -1,3 +1,3 @@
 # ConnorBot
 
-An experimental bot made with discord.js.
+ConnorBot is a personal Discord bot built with Discord.Net.
