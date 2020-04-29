@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Text.Json;
 using Microsoft.Extensions.Configuration;
 
@@ -11,12 +12,7 @@ namespace ConnorBot.Config
     {
         public static IConfigurationRoot CreateConfiguration(string moduleName)
         {
-            IConfigurationRoot newConfig = new ConfigurationBuilder()
-                                            .SetBasePath(Directory.GetCurrentDirectory())
-                                            .AddJsonFile("settings.json")
-                                            .Build();
-
-            return newConfig;
+            throw new NotImplementedException();
         }
     }
 }
