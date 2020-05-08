@@ -2,7 +2,9 @@
 using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
+using ConnorBot.Commands;
 using Discord;
+using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
 
@@ -16,7 +18,12 @@ namespace ConnorBot
         /// <summary>
         /// The Discord client.
         /// </summary>
-        private DiscordSocketClient client;
+        private DiscordSocketClient _client;
+
+        /// <summary>
+        /// The command handler.
+        /// </summary>
+        private CommandHandler _commandHandler;
 
         /// <summary>
         /// The entry-point method for starting the main asynchronous process.
@@ -32,28 +39,44 @@ namespace ConnorBot
         {
             if (!File.Exists("settings.json"))
             {
-                Settings settings = GetSettings();
-                string settingsJsonString = JsonSerializer.Serialize(settings, new JsonSerializerOptions
-                {
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                    WriteIndented = true
-                });
-                File.WriteAllText("settings.json", settingsJsonString);
+                CreateNewSettings();
             }
 
-            IConfigurationRoot config = new ConfigurationBuilder()
+            IConfiguration config = new ConfigurationBuilder()
                                             .SetBasePath(Directory.GetCurrentDirectory())
                                             .AddJsonFile("settings.json")
                                             .Build();
 
-            client = new DiscordSocketClient();
+            if (config["token"] == null)
+            {
+                CreateNewSettings();
+            }
 
-            client.Log += Logger.Log;
+            _client = new DiscordSocketClient();
 
-            await client.LoginAsync(TokenType.Bot, config["token"]);
-            await client.StartAsync();
+            _client.Log += Logger.Log;
+
+            await _client.LoginAsync(TokenType.Bot, config["token"]);
+            await _client.StartAsync();
+
+            _commandHandler = new CommandHandler(_client, new CommandService(), config);
+            await _commandHandler.InstallCommandAsync();
 
             await Task.Delay(-1);
+        }
+
+        /// <summary>
+        /// Creates new settings based on <c>GetSettings()</c>.
+        /// </summary>
+        public void CreateNewSettings()
+        {
+            Settings settings = GetSettings();
+            string settingsJsonString = JsonSerializer.Serialize(settings, new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                WriteIndented = true
+            });
+            File.WriteAllText("settings.json", settingsJsonString);
         }
 
         /// <summary>
